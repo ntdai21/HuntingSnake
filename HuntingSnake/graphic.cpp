@@ -47,4 +47,5 @@ void LoadMap(int lvl) {
 
 void CreatePlayMenu() {
 	cout << "Hello Dai";
+	cout << "Hello everyone";
 }
