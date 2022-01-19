@@ -6,6 +6,7 @@ using namespace std;
 int main() {
 	FixConsole();
 	system("pause");
+	cout << "123456";
 	return 0;
 	//12345
 	//1245688689070
