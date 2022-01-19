@@ -7,4 +7,5 @@ int main() {
 	FixConsole();
 	system("pause");
 	return 0;
+	//12345
 }
