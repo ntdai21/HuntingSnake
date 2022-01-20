@@ -5,11 +5,9 @@ using namespace std;
 
 int main() {
 	FixConsole();
+	cout << "12345678901234567890\n";
+	cout << CenterAlign((string)"Can giua 12345", 20) << endl;
 	system("pause");
-	cout << "123456";
 	return 0;
-	//12345
-	//1245688689070
-	cout << "Hieu";
-	//truyen
+	
 }

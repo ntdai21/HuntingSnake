@@ -46,6 +46,23 @@ void LoadMap(int lvl) {
 }
 
 void CreatePlayMenu() {
-	cout << "Hello Dai";
-	cout << "Hello everyone 12345";
+	
+}
+
+void GoToXY(COORD pos) {
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
+
+string CenterAlign(const string& str, const int& width) {
+	if (width <= str.size()) return str;
+	string newstr;
+	int index = width / 2 - str.size() / 2;
+	for (int i = 0; i < index; i++) {
+		newstr += ' ';
+	}
+	newstr += str;
+	for (int i = 0; i < width; i++) {
+		newstr += ' ';
+	}
+	return newstr;
 }
