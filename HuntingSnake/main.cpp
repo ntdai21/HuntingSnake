@@ -5,8 +5,13 @@ using namespace std;
 
 int main() {
 	FixConsole();
-	cout << "12345678901234567890\n";
-	cout << CenterAlign((string)"Can giua 12345", 20) << endl;
+
+	//Variables
+	int choose; //Main menu choose
+
+	MainMenu(choose);
+	ClearScreen();
+
 	system("pause");
 	return 0;
 	
