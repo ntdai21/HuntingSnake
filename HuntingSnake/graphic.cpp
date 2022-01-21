@@ -78,21 +78,35 @@ void MainMenu(int& choose) {
 	int colorChoose[4] = { def_color, 7, 7, 7 }; //Color of each choose
 	char key;
 	while (true) {
-		GotoXY(56, 19);
+		// 0123 
+		GotoXY(54, 19);
 		SetTextColor(colorChoose[0]);
-		cout << "CONTINUE";
+		cout << "  CONTINUE  ";
 
-		GotoXY(56, 20);
+		GotoXY(54, 20);
 		SetTextColor(colorChoose[1]);
-		cout << "NEW GAME";
+		cout << "  NEW GAME  ";
 
-		GotoXY(56, 21);
+		GotoXY(54, 21);
 		SetTextColor(colorChoose[2]);
-		cout << "SETTINGS";
+		cout << "  SETTINGS  ";
 
-		GotoXY(58, 22);
+		GotoXY(54, 22);
 		SetTextColor(colorChoose[3]);
-		cout << "QUIT";
+		cout << "    QUIT    ";
+
+		if (curChoose != 3) {
+			GotoXY(54, 19 + curChoose);
+			cout << '';
+			GotoXY(65, 19 + curChoose);
+			cout << '';
+		}
+		else {
+			GotoXY(56, 19 + curChoose);
+			cout << '';
+			GotoXY(63, 19 + curChoose);
+			cout << '';
+		}
 
 		key = _getch();
 		// 72: Up     80: Down    '\r': Enter
@@ -108,6 +122,7 @@ void MainMenu(int& choose) {
 		}
 		else if (key == '\r') {
 			choose = curChoose;
+			ClearScreen();
 			return;
 		}
 	}
@@ -165,4 +180,19 @@ void SetTextColor(int color) {
 
 void ClearScreen() {
 	cout << "\x1B[2J\x1B[H";
+}
+
+void Play(GameMap gameMap, Snake snake) {
+	DrawMap(gameMap);
+	DrawInfoUI();
+}
+
+void DrawMap(GameMap gameMap) {
+	
+}
+
+void DrawInfoUI() {
+	GotoXY(0, 26);
+	cout << "лллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл\n\n";
+	cout << "     SPEED:    px/s               FOOD:   /                 LVL:                  POINT:        ";
 }
