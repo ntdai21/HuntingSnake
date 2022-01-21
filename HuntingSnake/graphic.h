@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <conio.h>
+#include "struct.h"
 
 //Usable characters: • Ö ö × ¤ « » 
 
@@ -36,3 +37,12 @@ void SetTextColor(int color);
 
 //Clear screen
 void ClearScreen();
+
+//Play
+void Play(GameMap gameMap, Snake snake);
+
+//Draw map from file 
+void DrawMap(GameMap gameMap);
+
+//Draw area display gameplay infomation
+void DrawInfoUI();
