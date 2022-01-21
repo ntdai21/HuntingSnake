@@ -5,6 +5,9 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <conio.h>
+
+//Usable characters: • Ö ö × ¤ « » 
 
 //Fix console window to specify height and width
 //Prevent user from maximizing or scrolling console window
@@ -13,11 +16,23 @@ void FixConsole();
 
 void LoadMap(int lvl);
 
-//Create area displaying all game properties like point, speed, lvl,...
-void CreatePlayMenu();
+//Draw title HUNTINGSNAKE
+void DrawTitle();
+
+//Interact with main menu
+void MainMenu(int& choose);
 
 //Move the cursor to the position on the screen
-void GoToXY(COORD pos);
+void GotoXY(const int& x, const int& y);
 
 //Return centered string
 std::string CenterAlign(const std::string& str, const int& width);
+
+//Resize font size with scale
+void SetFontScale(const int& scale);
+
+//Set text color
+void SetTextColor(int color);
+
+//Clear screen
+void ClearScreen();
