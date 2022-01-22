@@ -11,9 +11,11 @@ int main() {
 	GameMap gameMap;
 	Snake snake; 
 	int curLVL; //Current level
+	int consoleSizeScale = 100;
 
 	//Functions
 	FixConsole();
+	ScaleMenu(consoleSizeScale);
 	while (choose != 3) {
 		MainMenu(choose);
 		if (choose == 0) {

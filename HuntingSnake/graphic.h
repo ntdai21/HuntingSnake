@@ -46,3 +46,9 @@ void DrawMap(GameMap gameMap);
 
 //Draw area display gameplay infomation
 void DrawInfoUI();
+
+//Draw menu for scale size of console window
+void ScaleMenu(int& scale);
+
+//Draw adjust bar showing percentage
+std::string DrawAdjustBar(const int& width, const int& fill);
