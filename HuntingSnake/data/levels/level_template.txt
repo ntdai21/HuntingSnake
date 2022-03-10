@@ -1,0 +1,56 @@
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                     HGFEDCBA                                                  /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+                                                                                               /
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+---------------------------------------------Snake----------------------------------------------
+SPEED 10
+DIRECTION d
+---------------------------------------------Level----------------------------------------------
+MAX_FOOD 25
+FOOD_TO_SPEED_UP 5
+EXTRA_TIME_EACH_FOOD 0
+---------------------------------------------Modes----------------------------------------------
+TIME_LIMIT 0
+CAN_SELF_TOUCHING 0
+-------------------------------------------Tutorials--------------------------------------------
+Use Notepad++ to edit. For easy, use overwrite mode often.
+For Map Creation:
+ - Use '0' to make wall.
+ - Use 'A', 'B', 'C',... to create snake bodies in alphabetical order. 'A' will be the snake head.
+For Snake's Variables:
+ - SPEED: (>0) Initial speed when entering the map.
+ - DIRECTION: ('a', 'd', 'w', 's') Initial direction the snake moves.
+For Level's Variables:
+ - MAX_FOOD: (>0) The maximum amount of food needed to win.
+ - FOOD_TO_SPEED_UP: (>0) The amount of food needed to increase snake's speed by 1.
+ - EXTRA_TIME_EACH_FOOD: (>0) The amount of extra time added for each food.
+For Modes (bool):
+ - TIME_LIMIT: If true, the snake must eat all food before time runs out or it will die.
+ - CAN_SELF_TOUCHING: If true, the snake will not die when it hits itself.
+When done, delete this tutorial part and rename this file in the format: level[num].txt
+And delete file .bak too.
