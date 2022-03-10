@@ -21,6 +21,9 @@
     <ClCompile Include="graphic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphic.h">
@@ -29,5 +32,13 @@
     <ClInclude Include="struct.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\levels\map1.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
