@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <conio.h>
+#include <vector>
 #include "struct.h"
 
 //Usable characters: • Ö ö × ¤ « » 
@@ -52,3 +53,5 @@ void ScaleMenu(int& scale);
 
 //Draw adjust bar showing percentage
 std::string DrawAdjustBar(const int& width, const int& fill);
+
+void Makefood(GameMap& gameMap, int n);

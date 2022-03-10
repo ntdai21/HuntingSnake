@@ -8,7 +8,7 @@ struct GameMap {
 	int maxFood; //Maximum amount of food can be collected in this level
 	std::vector<COORD> wall; //Wall positions.
 	std::vector<COORD> gate; //Gate positions.
-	COORD food; //Food position.
+	std::vector<COORD> food; //Food position.
 };
 
 struct Snake {

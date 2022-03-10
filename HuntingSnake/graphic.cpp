@@ -3,6 +3,11 @@
 #define heightCon 30;
 #define widthCon 120;
 
+#define PA_X 1
+#define PA_Y 1
+#define PA_DX 93
+#define PA_DY 25
+
 
 using namespace std;
 
@@ -186,6 +191,7 @@ void ClearScreen() {
 void Play(GameMap gameMap, Snake snake) {
 	DrawMap(gameMap);
 	DrawInfoUI();
+	Makefood(gameMap, 5);
 	_getch();
 }
 
@@ -194,11 +200,38 @@ void DrawMap(GameMap gameMap) {
 }
 
 void DrawInfoUI() {
-	//¿ À À Ú Ù ³ Ä
-	GotoXY(0, 26);
-	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\n\n";
-	cout << "³           SPEED: 00 px/s               FOOD: 00 / 00             LVL: 00               POINT: 000 000                ³\n\n";
-	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ";
+		//¿ À À Ú Ù ³ Ä
+		GotoXY(0, 0);
+		cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿";
+		cout << "³                                                                                             ³³       OBJECTIVE       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+		cout << "³                                                                                             ³³    CURRENT LVL: 00    ³";
+		cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³   SPEED: 00 cell/s    ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³   FOOD:               ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³   LIFE: 00            ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³       POINT:          ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³³                       ³";
+		cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+		cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ³  A,S,W,D: MOVE SNAKE  ³";
+		cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿³                       ³";
+		cout << "³ LIFE TIME:                                                                                  ³³    ESC: PAUSE GAME    ³";
+		cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ";
 }
 
 void ScaleMenu(int& scale) {
@@ -221,6 +254,20 @@ void ScaleMenu(int& scale) {
 			ClearScreen();
 			return;
 		}
+	}
+}
+
+void Makefood(GameMap& gameMap, int n) {
+	int i = 0;
+	gameMap.food.resize(n);
+	while (i < n) {
+		int x = rand() % (PA_DX - 2 + 1) + 2;
+		int y = rand() % (PA_DY - 2 + 1) + 2;
+		GotoXY(x, y);
+		cout << char(004);
+		gameMap.food[i].X = x;
+		gameMap.food[i].Y = y;
+		i++;
 	}
 }
 
