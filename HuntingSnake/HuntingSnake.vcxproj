@@ -141,11 +141,9 @@
   <ItemGroup>
     <ClCompile Include="graphic.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="game_mechanic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphic.h" />
-    <ClInclude Include="game_mechanic.h" />
     <ClInclude Include="struct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
