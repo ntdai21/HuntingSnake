@@ -54,7 +54,9 @@
 struct GameLVL {
 	int maxFood = 6; //Maximum amount of food can be collected in this level.
 	std::vector<COORD> wall; //Wall positions.
-	COORD food; //Food position.
+	std::vector<COORD> gate; //Gate positions.
+	std::vector<COORD> food; //Food position.
+	COORD food_1; //Food position.
 	int foodToSpeedUp = 5; //Amount of food to increase speed.
 	float extraTimePerFood;
 	//Modes
