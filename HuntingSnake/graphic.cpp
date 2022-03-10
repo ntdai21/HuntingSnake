@@ -1,8 +1,6 @@
 #include "graphic.h"
-
-#define heightCon 30;
-#define widthCon 120;
-
+#include "game_mechanic.h"
+#include <cmath>
 
 using namespace std;
 
@@ -13,15 +11,15 @@ void FixConsole() {
 	SMALL_RECT lpConsoleWindow;
 	lpConsoleWindow.Top = 0;
 	lpConsoleWindow.Left = 0;
-	lpConsoleWindow.Right = widthCon;
-	lpConsoleWindow.Bottom = heightCon;
+	lpConsoleWindow.Right = WINDOW_WIDTH;
+	lpConsoleWindow.Bottom = WINDOW_HEIGHT;
 	SetConsoleWindowInfo(hConsoleOutput, 1, &lpConsoleWindow); //Parameter '1' specifies the upper left corner as the coordinate angle
 	
 	//Set console screen buffer size
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD dwSize;
-	dwSize.X = widthCon;
-	dwSize.Y = heightCon;
+	dwSize.X = WINDOW_WIDTH;
+	dwSize.Y = WINDOW_HEIGHT;
 	SetConsoleScreenBufferSize(hConsoleOutput, dwSize);	
 
 	//Disable maximize console window
@@ -36,7 +34,7 @@ void FixConsole() {
 	ShowScrollBar(hWnd, SB_BOTH, 0); //If third parameter is 0, scrollbars are hidden.
 
 	//Set font
-	SetFontScale(100);
+	SetFontScale(FONT_SCALE);
 
 	//Hide cursor
 	CONSOLE_CURSOR_INFO cursorInfo;
@@ -45,16 +43,9 @@ void FixConsole() {
 	SetConsoleCursorInfo(hConsoleOutput, &cursorInfo);
 }
 
-void LoadMap(int lvl) {
-	ifstream fIn;
-	fIn.open("data\\levels\\template1.txt", ios::in);
-	char str[20];
-	fIn >> str;
-	cout << str;
-	fIn.close();
-}
 
-void DrawTitle() {
+
+void DrawTitle1() {
 	//Ü ß Û
 	GotoXY(0, 5);
 	cout << "                ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ                ";
@@ -70,9 +61,9 @@ void DrawTitle() {
 	cout << "MADE BY GROUP 12";
 }
 
-void MainMenu(int& choose) {
+void MainMenu(int* choose) {
 	ClearScreen();
-	DrawTitle();
+	DrawTitle1();
 	//Selecting
 	int def_color = 3; //Default color
 	int curChoose = 0; //Current choose
@@ -122,7 +113,7 @@ void MainMenu(int& choose) {
 			colorChoose[curChoose] = def_color;
 		}
 		else if (key == '\r') {
-			choose = curChoose;
+			*choose = curChoose;
 			ClearScreen();
 			return;
 		}
@@ -144,7 +135,7 @@ string CenterAlign(const string& str, const int& width) {
 		newstr += ' ';
 	}
 	newstr += str;
-	for (int i = 0; i < width; i++) {
+	for (int i = newstr.size(); i < width; i++) {
 		newstr += ' ';
 	}
 	return newstr;
@@ -179,26 +170,13 @@ void SetTextColor(int color) {
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
-void ClearScreen() {
-	cout << "\x1B[2J\x1B[H";
-}
 
-void Play(GameMap gameMap, Snake snake) {
-	DrawMap(gameMap);
-	DrawInfoUI();
-	_getch();
-}
 
-void DrawMap(GameMap gameMap) {
-	
-}
-
-void DrawInfoUI() {
-	//¿ À À Ú Ù ³ Ä
-	GotoXY(0, 26);
-	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\n\n";
-	cout << "³           SPEED: 00 px/s               FOOD: 00 / 00             LVL: 00               POINT: 000 000                ³\n\n";
-	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ";
+void DrawWall(GameLVL& gameLVL) {
+	for (COORD i : gameLVL.wall) {
+		GotoXY(i.X, i.Y);
+		cout << '²';
+	}
 }
 
 void ScaleMenu(int& scale) {
@@ -228,7 +206,476 @@ string DrawAdjustBar(const int& width, const int& fill) {
 	string bar;
 	for (int i = 1; i <= width; i++) {
 		if (i <= fill) bar += 'Û';
-		else bar += 'Ä';
+		else bar += '°';
 	}
 	return bar;
+}
+
+void KeyInputThread(char *direct, bool *snakeState) {
+	char key = 'A';
+	while (*snakeState) {
+		key = _getch();
+		switch (key)
+		{
+		case 'a':
+		case 'A':
+			*direct = 'a';
+			break;
+		case 'd':
+		case 'D':
+			*direct = 'd';
+			break;
+		case 'w':
+		case 'W':
+			*direct = 'w';
+			break;
+		case 's':
+		case 'S':
+			*direct = 's';
+			break;
+		case 'p':
+		case 'P':
+			*snakeState = 0;
+		default:
+			break;
+		}
+	}
+}
+
+void SwapCOORD(COORD& A, COORD& B) {
+	COORD temp = A;
+	A = B;
+	B = temp;
+}
+
+int FindInCOORD(const COORD& var, const vector<COORD>& arr) {
+	for (int i = arr.size() - 1; i > -1; i--) {
+		if (var.X == arr[i].X && var.Y == arr[i].Y) return i;
+	}
+	return -1;
+}
+
+//TITLE------------------------------------------------------------------------------------------------------------------------------------
+
+Title CreateTitle(const string& str, const int& color, const char& pattern) {
+	Title title;
+	title.color = color;
+	title.pattern = pattern;
+	for (int i = 0; i < str.size(); i++) {
+		//Create space between 2 big characters
+		if (i != 0) {
+			for (int i = 0; i < 5; i++) {
+				title.text[i] += "  ";
+			}
+		}
+
+		switch (str.at(i))
+		{
+		case 'a':
+		case 'A':
+			title.text[0] += "00000";
+			title.text[1] += "0   0";
+			title.text[2] += "00000";
+			title.text[3] += "0   0";
+			title.text[4] += "0   0";
+			break;
+		case 'b':
+		case 'B':
+			title.text[0] += "0000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "0000 ";
+			title.text[3] += "0   0";
+			title.text[4] += "0000 ";
+			break;
+		case 'c':
+		case 'C':
+			title.text[0] += "00000";
+			title.text[1] += "0    ";
+			title.text[2] += "0    ";
+			title.text[3] += "0    ";
+			title.text[4] += "00000";
+			break;
+		case 'd':
+		case 'D':
+			title.text[0] += "0000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "0   0";
+			title.text[3] += "0   0";
+			title.text[4] += "0000 ";
+			break;
+		case 'e':
+		case 'E':
+			title.text[0] += "00000";
+			title.text[1] += "0    ";
+			title.text[2] += "00000";
+			title.text[3] += "0    ";
+			title.text[4] += "00000";
+			break;
+		case 'f':
+		case 'F':
+			title.text[0] += "00000";
+			title.text[1] += "0    ";
+			title.text[2] += "00000";
+			title.text[3] += "0    ";
+			title.text[4] += "0    ";
+			break;
+		case 'g':
+		case 'G':
+			title.text[0] += "00000";
+			title.text[1] += "0    ";
+			title.text[2] += "0 000";
+			title.text[3] += "0   0";
+			title.text[4] += "00000";
+			break;
+		case 'h':
+		case 'H':
+			title.text[0] += "0   0";
+			title.text[1] += "0   0";
+			title.text[2] += "00000";
+			title.text[3] += "0   0";
+			title.text[4] += "0   0";
+			break;
+		case 'i':
+		case 'I':
+			title.text[0] += "00000";
+			title.text[1] += "  0  ";
+			title.text[2] += "  0  ";
+			title.text[3] += "  0  ";
+			title.text[4] += "00000";
+			break;
+		case 'j':
+		case 'J':
+			title.text[0] += "00000";
+			title.text[1] += "   0 ";
+			title.text[2] += "   0 ";
+			title.text[3] += "   0 ";
+			title.text[4] += "000  ";
+			break;
+		case 'k':
+		case 'K':
+			title.text[0] += "0   0";
+			title.text[1] += "0  0 ";
+			title.text[2] += "000  ";
+			title.text[3] += "0  0 ";
+			title.text[4] += "0   0";
+			break;
+		case 'l':
+		case 'L':
+			title.text[0] += "0    ";
+			title.text[1] += "0    ";
+			title.text[2] += "0    ";
+			title.text[3] += "0    ";
+			title.text[4] += "00000";
+			break;
+		case 'm':
+		case 'M':
+			title.text[0] += "00 00";
+			title.text[1] += "0 0 0";
+			title.text[2] += "0 0 0";
+			title.text[3] += "0   0";
+			title.text[4] += "0   0";
+			break;
+		case 'n':
+		case 'N':
+			title.text[0] += "0   0";
+			title.text[1] += "00  0";
+			title.text[2] += "0 0 0";
+			title.text[3] += "0  00";
+			title.text[4] += "0   0";
+			break;
+		case 'o':
+		case 'O':
+			title.text[0] += "00000";
+			title.text[1] += "0   0";
+			title.text[2] += "0   0";
+			title.text[3] += "0   0";
+			title.text[4] += "00000";
+			break;
+		case 'p':
+		case 'P':
+			title.text[0] += "00000";
+			title.text[1] += "0   0";
+			title.text[2] += "00000";
+			title.text[3] += "0    ";
+			title.text[4] += "0    ";
+			break;
+		case 'q':
+		case 'Q':
+			title.text[0] += "00000";
+			title.text[1] += "0   0";
+			title.text[2] += "0   0";
+			title.text[3] += "0  00";
+			title.text[4] += "00000";
+			break;
+		case 'r':
+		case 'R':
+			title.text[0] += "0000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "0000 ";
+			title.text[3] += "0   0";
+			title.text[4] += "0   0";
+			break;
+		case 's':
+		case 'S':
+			title.text[0] += "00000";
+			title.text[1] += "0    ";
+			title.text[2] += "00000";
+			title.text[3] += "    0";
+			title.text[4] += "00000";
+			break;
+		case 't':
+		case 'T':
+			title.text[0] += "00000";
+			title.text[1] += "  0  ";
+			title.text[2] += "  0  ";
+			title.text[3] += "  0  ";
+			title.text[4] += "  0  ";
+			break;
+		case 'u':
+		case 'U':
+			title.text[0] += "0   0";
+			title.text[1] += "0   0";
+			title.text[2] += "0   0";
+			title.text[3] += "0   0";
+			title.text[4] += "00000";
+			break;
+		case 'v':
+		case 'V':
+			title.text[0] += "0   0";
+			title.text[1] += "0   0";
+			title.text[2] += " 0 0 ";
+			title.text[3] += " 0 0 ";
+			title.text[4] += "  0  ";
+			break;
+		case 'w':
+		case 'W':
+			title.text[0] += "0   0";
+			title.text[1] += "0   0";
+			title.text[2] += "0 0 0";
+			title.text[3] += "0 0 0";
+			title.text[4] += "00 00";
+			break;
+		case 'x':
+		case 'X':
+			title.text[0] += "0   0";
+			title.text[1] += " 0 0 ";
+			title.text[2] += "  0  ";
+			title.text[3] += " 0 0 ";
+			title.text[4] += "0   0";
+			break;
+		case 'y':
+		case 'Y':
+			title.text[0] += "0   0";
+			title.text[1] += " 0 0 ";
+			title.text[2] += "  0  ";
+			title.text[3] += "  0  ";
+			title.text[4] += "  0  ";
+			break;
+		case 'z':
+		case 'Z':
+			title.text[0] += "00000";
+			title.text[1] += "   0 ";
+			title.text[2] += "  0  ";
+			title.text[3] += " 0   ";
+			title.text[4] += "00000";
+			break;
+		case ' ':
+			title.text[0] += "     ";
+			title.text[1] += "     ";
+			title.text[2] += "     ";
+			title.text[3] += "     ";
+			title.text[4] += "     ";
+			break;
+		case '0':
+			title.text[0] += " 000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "0   0";
+			title.text[3] += "0   0";
+			title.text[4] += " 000 ";
+			break;
+		case '1':
+			title.text[0] += "  00 ";
+			title.text[1] += " 0 0 ";
+			title.text[2] += "0  0 ";
+			title.text[3] += "   0 ";
+			title.text[4] += "00000";
+			break;
+		case '2':
+			title.text[0] += " 000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "   0 ";
+			title.text[3] += "  0  ";
+			title.text[4] += "00000";
+			break;
+		case '3':
+			title.text[0] += " 000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "  00 ";
+			title.text[3] += "0   0";
+			title.text[4] += " 000 ";
+			break;
+		case '4':
+			title.text[0] += "   0 ";
+			title.text[1] += "  0  ";
+			title.text[2] += " 0 0 ";
+			title.text[3] += "00000";
+			title.text[4] += "   0 ";
+			break;
+		case '5':
+			title.text[0] += "00000";
+			title.text[1] += "0    ";
+			title.text[2] += " 000 ";
+			title.text[3] += "    0";
+			title.text[4] += "0000 ";
+			break;
+		case '6':
+			title.text[0] += " 000 ";
+			title.text[1] += "0    ";
+			title.text[2] += "00000";
+			title.text[3] += "0   0";
+			title.text[4] += " 000 ";
+			break;
+		case '7':
+			title.text[0] += "00000";
+			title.text[1] += "   0 ";
+			title.text[2] += "  0  ";
+			title.text[3] += " 0   ";
+			title.text[4] += " 0   ";
+			break;
+		case '8':
+			title.text[0] += " 000 ";
+			title.text[1] += "0   0";
+			title.text[2] += " 000 ";
+			title.text[3] += "0   0";
+			title.text[4] += " 000 ";
+			break;
+		case '9':
+			title.text[0] += " 000 ";
+			title.text[1] += "0   0";
+			title.text[2] += "00000";
+			title.text[3] += "    0";
+			title.text[4] += " 000 ";
+			break;
+		default:
+			break;
+		}
+	}
+	ReplacePatternTitle(title, pattern);
+	return title;
+}
+
+void ReplaceCharacterString(string& str, const char& oldChar, const char& newChar) {
+	for (int i = 0; i < str.size(); i++) {
+		if (str.at(i) == oldChar) str.at(i) = newChar;
+	}
+}
+
+void ReplacePatternTitle(Title& title, const char& pattern) {
+	for (int i = 0; i < 5; i++) {
+		ReplaceCharacterString(title.text[i], '0', pattern);
+	}
+}
+
+void DrawTitle(const COORD& pos, const Title& title) {
+	for (int i = 0; i < 5; i++) {
+		GotoXY(pos.X, pos.Y + i);
+		cout << title.text[i];
+	}
+}
+
+void DrawTitlePlayArea(const string& str) {
+	Title title = CreateTitle(str, 7, '²');
+	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
+	CenterSquareInSquare({ PA_X, PA_Y, PA_DX, PA_DY }, &titleSquare);
+	DrawTitle({ titleSquare.x, titleSquare.y }, title);
+}
+
+void PrintSubTextPA(const string& str) {
+	GotoXY(0, TEXT_SUB_PA);
+	cout << CenterAlign(str, PA_DX);
+}
+
+
+//CLEAR SCREEN-----------------------------------------------------------------------------------------------------------------------------
+
+void ClearSquare(const Square& square) {
+	for (int i = square.y; i <= square.dy + square.y; i++) {
+		GotoXY(square.x, i);
+		for (int j = 1; j <= square.dx + 1; j++) {
+			cout << ' ';
+		}
+	}
+}
+
+void ClearScreen() {
+	cout << "\x1B[2J\x1B[H";
+}
+
+//SCREEN CALCULATOR------------------------------------------------------------------------------------------------------------------------
+
+void CenterSquareInSquare(const Square& bigSquare, Square* smallSquare) {
+	COORD pos;
+	if (bigSquare.dx * bigSquare.dy <= smallSquare->dx * smallSquare->dy) return;
+	smallSquare->x = bigSquare.x + (bigSquare.dx - smallSquare->dx) / 2;
+	smallSquare->y = bigSquare.y + (bigSquare.dy - smallSquare->dy) / 2;
+}
+
+//PLAY AREA--------------------------------------------------------------------------------------------------------------------------------
+
+//UI---------------------------------------------------------------------------------------------------------------------------------------
+
+void DrawInfoUI(GameLVL& gameLVL, Snake& snake, const int* curLVL) {
+	//¿ À À Ú Ù ³ Ä
+	GotoXY(0, 0);
+	cout << "                                                                                               ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿";
+	cout << "                                                                                               ³       OBJECTIVE       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "                                                                                               ³    CURRENT LVL: 00    ³";
+	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³   SPEED: 00 cell/s    ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³   FOOD: 000 / 000     ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³   LIFE: 00            ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³         POINT         ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ³      000.000.000      ³";
+	cout << "                                                                                               ³                       ³";
+	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "                                                                                               ³  A,S,W,D: MOVE SNAKE  ³";
+	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿³                       ³";
+	cout << "³ LIFE TIME:                                                                                  ³³    ESC: PAUSE GAME    ³";
+	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ";
+	//Update UI infomation
+	UpdateUIInfo(curLVL, 2, UI_LVL_X, UI_LVL_Y);
+	UpdateUIInfo(&snake.speed, 2, UI_SPEED_X, UI_SPEED_Y);
+}
+
+void UpdateFoodUI(const int& food) {
+	if (food < 10) GotoXY(2 + UI_FOOD_X, UI_FOOD_Y);
+	else if (food < 100) GotoXY(1 + UI_FOOD_X, UI_FOOD_Y);
+	else GotoXY(UI_FOOD_X, UI_FOOD_Y);
+	cout << food;
+}
+
+void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, const short& y) {
+	int maxLength = *info;
+	int pos = 0;
+	while (maxLength >= 10) {
+		maxLength /= 10;
+		pos++;
+	}
+	GotoXY(x + maxLengthInfo - pos - 1, y);
+	cout << *info;
 }
