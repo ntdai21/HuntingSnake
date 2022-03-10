@@ -3,12 +3,6 @@
 #define heightCon 30;
 #define widthCon 120;
 
-#define PA_X 1
-#define PA_Y 1
-#define PA_DX 93
-#define PA_DY 25
-
-
 using namespace std;
 
 void FixConsole() {
