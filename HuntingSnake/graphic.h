@@ -7,8 +7,6 @@
 #include <string>
 #include <conio.h>
 #include "struct.h"
-#include <ctime>
-#include <thread>
 
 //Usable characters: • Ö ö × ¤ « » 
 
@@ -17,11 +15,13 @@
 //Idea: https://codelearn.io/sharing/windowsh-va-ham-dinh-dang-console-p1
 void FixConsole();
 
+void LoadMap(int lvl);
+
 //Draw title HUNTINGSNAKE
-void DrawTitle1();
+void DrawTitle();
 
 //Interact with main menu
-void MainMenu(int* choose);
+void MainMenu(int& choose);
 
 //Move the cursor to the position on the screen
 void GotoXY(const int& x, const int& y);
@@ -35,56 +35,20 @@ void SetFontScale(const int& scale);
 //Set text color
 void SetTextColor(int color);
 
+//Clear screen
+void ClearScreen();
 
-
-
+//Play
+void Play(GameMap gameMap, Snake snake);
 
 //Draw map from file 
-void DrawWall(GameLVL& gameLVL);
+void DrawMap(GameMap gameMap);
+
+//Draw area display gameplay infomation
+void DrawInfoUI();
 
 //Draw menu for scale size of console window
 void ScaleMenu(int& scale);
 
 //Draw adjust bar showing percentage
 std::string DrawAdjustBar(const int& width, const int& fill);
-
-void KeyInputThread(char *direct, bool *snakeState);
-
-void SwapCOORD(COORD& A, COORD& B);
-
-int FindInCOORD(const COORD& var, const std::vector<COORD>& arr);
-
-//TITLE------------------------------------------------------------------------------------------------------------------------------------
-	//Create a title from a string
-Title CreateTitle(const std::string& str, const int& color, const char& pattern);
-	//Replace old character to new one in a string;
-void ReplaceCharacterString(std::string& str, const char& oldChar, const char& newChar);
-	//Replace old pattern to new one in a title
-void ReplacePatternTitle(Title& title, const char& pattern);
-	//Draw title
-void DrawTitle(const COORD& pos, const Title& title);
-	//Draw title in center play area
-void DrawTitlePlayArea(const std::string& str);
-void PrintSubTextPA(const std::string& str);
-
-//CLEAR SCREEN-----------------------------------------------------------------------------------------------------------------------------
-	//Clear a square area on screen
-void ClearSquare(const Square& square);
-	//Clear entire screen
-void ClearScreen();
-
-//SCREEN CALCULATOR------------------------------------------------------------------------------------------------------------------------
-	//Get position that
-void CenterSquareInSquare(const Square& bigSquare, Square* smallSquare);
-
-//PLAY AREA--------------------------------------------------------------------------------------------------------------------------------
-
-
-
-//UI---------------------------------------------------------------------------------------------------------------------------------------
-	//Draw area display UI
-void DrawInfoUI(GameLVL& gameLVL, Snake& snake, const int* curLVL);
-	//Update UI
-void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, const short& y);
-
-

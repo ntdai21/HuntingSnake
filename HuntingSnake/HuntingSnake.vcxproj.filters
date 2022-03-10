@@ -21,18 +21,12 @@
     <ClCompile Include="graphic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_mechanic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="struct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_mechanic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
