@@ -9,6 +9,7 @@
 #include "struct.h"
 #include <ctime>
 #include <thread>
+#include <mmsystem.h>
 
 //Usable characters: • Ö ö × ¤ « » 
 
@@ -33,11 +34,7 @@ std::string CenterAlign(const std::string& str, const int& width);
 void SetFontScale(const int& scale);
 
 //Set text color
-void SetTextColor(int color);
-
-
-
-
+void SetTextColor(const int& background, const int& text);
 
 //Draw map from file 
 void DrawWall(GameLVL& gameLVL);
@@ -46,7 +43,7 @@ void DrawWall(GameLVL& gameLVL);
 void ScaleMenu(int& scale);
 
 //Draw adjust bar showing percentage
-std::string DrawAdjustBar(const int& width, const int& fill);
+std::string DrawAdjustBar(const int& width, const float& fill);
 
 void KeyInputThread(char *direct, bool *snakeState);
 
@@ -83,7 +80,7 @@ void CenterSquareInSquare(const Square& bigSquare, Square* smallSquare);
 
 //UI---------------------------------------------------------------------------------------------------------------------------------------
 	//Draw area display UI
-void DrawInfoUI(GameLVL& gameLVL, Snake& snake, const int* curLVL);
+void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL);
 	//Update UI
 void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, const short& y);
 

@@ -23,7 +23,7 @@ void HitWall(bool& snakeState);
 //Call when eat enough food
 void Win(int* curLVL);
 
-void Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL);
+bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL);
 
 COORD SpawnFood(const std::vector<COORD>* body, const std::vector<COORD>* wall);
 
@@ -33,3 +33,9 @@ void Play(GameLVL* gameLVL, Snake* snake, const int* curLVL);
 bool LoadLVL(const int* lvl, GameLVL* gameLVL, Snake* snake);
 
 void ResetGameLVLAndSnakeData(GameLVL* gameLVL, Snake* snake);
+
+void TimeCountDown(size_t* timer);
+
+void CheckTimer(GameLVL* gameLVL, Snake* snake);
+
+void UpdateLifeTime(const GameLVL* gameLVL);

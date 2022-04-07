@@ -1,6 +1,7 @@
 #include "graphic.h"
 #include "game_mechanic.h"
 #include <cmath>
+#include "sound.h"
 
 using namespace std;
 
@@ -57,6 +58,10 @@ void DrawTitle1() {
 	cout << "                Û  ²   ²  ²²²²²  ²   ²    ²    ²²²²²  ²   ²  ²²²²²  ²²²²²  ²   ²  ²   ²  ²   ²  ²²²²²  Û                ";
 	cout << "                Û                                                                                      Û                ";
 	cout << "                ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                    ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                ";
+	Title title = CreateTitle("HUNTINGSNAKE", INFO_TITLE_COLOR, char(219));
+	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
+	CenterSquareInSquare({ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - 10 }, &titleSquare);
+	DrawTitle({ titleSquare.x, titleSquare.y }, title);
 	GotoXY(52, 13);
 	cout << "MADE BY GROUP 12";
 }
@@ -65,26 +70,25 @@ void MainMenu(int* choose) {
 	ClearScreen();
 	DrawTitle1();
 	//Selecting
-	int def_color = 3; //Default color
 	int curChoose = 0; //Current choose
-	int colorChoose[4] = { def_color, 7, 7, 7 }; //Color of each choose
+	int colorChoose[4] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR }; //Color of each choose
 	char key;
 	while (true) {
 		// 0123 
 		GotoXY(54, 19);
-		SetTextColor(colorChoose[0]);
+		SetTextColor(BACKGROUND_COLOR, colorChoose[0]);
 		cout << "  CONTINUE  ";
 
 		GotoXY(54, 20);
-		SetTextColor(colorChoose[1]);
+		SetTextColor(BACKGROUND_COLOR, colorChoose[1]);
 		cout << "  NEW GAME  ";
 
 		GotoXY(54, 21);
-		SetTextColor(colorChoose[2]);
+		SetTextColor(BACKGROUND_COLOR, colorChoose[2]);
 		cout << "  SETTINGS  ";
 
 		GotoXY(54, 22);
-		SetTextColor(colorChoose[3]);
+		SetTextColor(BACKGROUND_COLOR, colorChoose[3]);
 		cout << "    QUIT    ";
 
 		if (curChoose != 3) {
@@ -101,18 +105,20 @@ void MainMenu(int* choose) {
 		}
 
 		key = _getch();
+		PlayMP3("menu_choosing");
 		// 72: Up     80: Down    '\r': Enter
 		if ((key == 'w' || key == 'W') && (curChoose >= 1 && curChoose <= 3)) {
-			colorChoose[curChoose] = 7;
+			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
 			curChoose--;
-			colorChoose[curChoose] = def_color;
+			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
 		}
 		else if ((key == 's' || key == 'S') && (curChoose >= 0 && curChoose <= 2)) {
-			colorChoose[curChoose] = 7;
+			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
 			curChoose++;
-			colorChoose[curChoose] = def_color;
+			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
 		}
 		else if (key == '\r') {
+			PlayMP3("enter");
 			*choose = curChoose;
 			ClearScreen();
 			return;
@@ -150,7 +156,7 @@ void SetFontScale(const int& scale) {
 	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), 0, &cf);
 }
 
-void SetTextColor(int color) {
+void SetTextColor(const int& background, const int& text) {
 	// 0. Black
 	// 1. Blue
 	// 2. Green
@@ -167,7 +173,7 @@ void SetTextColor(int color) {
 	// 13. Light Purple
 	// 14. Light Yellow
 	// 15. Light White
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 16 * background + text);
 }
 
 
@@ -189,7 +195,7 @@ void ScaleMenu(int& scale) {
 	char key;
 	while (true) {
 		GotoXY(7, 2);
-		cout << DrawAdjustBar(20, scale / 10) << ' ' << setw(3) << scale << '%';
+		cout << DrawAdjustBar(20, (float)scale / (10 * 20)) << ' ' << setw(3) << scale << '%';
 		SetFontScale(scale);
 		key = _getch();
 		// 72: Up     80: Down    '\r': Enter
@@ -202,10 +208,10 @@ void ScaleMenu(int& scale) {
 	}
 }
 
-string DrawAdjustBar(const int& width, const int& fill) {
+string DrawAdjustBar(const int& width, const float& fill) {
 	string bar;
 	for (int i = 1; i <= width; i++) {
-		if (i <= fill) bar += 'Û';
+		if (i <= fill * width) bar += 'Û';
 		else bar += '°';
 	}
 	return bar;
@@ -577,6 +583,7 @@ void ReplacePatternTitle(Title& title, const char& pattern) {
 }
 
 void DrawTitle(const COORD& pos, const Title& title) {
+	SetTextColor(BACKGROUND_COLOR, INFO_TITLE_COLOR);
 	for (int i = 0; i < 5; i++) {
 		GotoXY(pos.X, pos.Y + i);
 		cout << title.text[i];
@@ -584,24 +591,24 @@ void DrawTitle(const COORD& pos, const Title& title) {
 }
 
 void DrawTitlePlayArea(const string& str) {
-	Title title = CreateTitle(str, 7, '²');
+	Title title = CreateTitle(str, 7, char(219));
 	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
 	CenterSquareInSquare({ PA_X, PA_Y, PA_DX, PA_DY }, &titleSquare);
 	DrawTitle({ titleSquare.x, titleSquare.y }, title);
 }
 
 void PrintSubTextPA(const string& str) {
-	GotoXY(0, TEXT_SUB_PA);
-	cout << CenterAlign(str, PA_DX);
+	GotoXY(PA_X , TEXT_SUB_PA);
+	cout << CenterAlign(str, PA_DX );
 }
 
 
 //CLEAR SCREEN-----------------------------------------------------------------------------------------------------------------------------
 
 void ClearSquare(const Square& square) {
-	for (int i = square.y; i <= square.dy + square.y; i++) {
+	for (int i = square.y; i < square.dy + square.y; i++) {
 		GotoXY(square.x, i);
-		for (int j = 1; j <= square.dx + 1; j++) {
+		for (int j = 1; j <= square.dx; j++) {
 			cout << ' ';
 		}
 	}
@@ -624,49 +631,63 @@ void CenterSquareInSquare(const Square& bigSquare, Square* smallSquare) {
 
 //UI---------------------------------------------------------------------------------------------------------------------------------------
 
-void DrawInfoUI(GameLVL& gameLVL, Snake& snake, const int* curLVL) {
+void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 	//¿ À À Ú Ù ³ Ä
 	GotoXY(0, 0);
-	cout << "                                                                                               ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿";
-	cout << "                                                                                               ³       OBJECTIVE       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
-	cout << "                                                                                               ³    CURRENT LVL: 00    ³";
-	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³   SPEED: 00 cell/s    ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³   FOOD: 000 / 000     ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³   LIFE: 00            ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³         POINT         ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ³      000.000.000      ³";
-	cout << "                                                                                               ³                       ³";
-	cout << "                                                                                               ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
-	cout << "                                                                                               ³  A,S,W,D: MOVE SNAKE  ³";
+	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿";
+	cout << "³                                                                                             ³³       OBJECTIVE       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "³                                                                                             ³³    CURRENT LVL: 00    ³";
+	cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³   SPEED: 00 cell/s    ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³   FOOD: 000 / 000     ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³   LIFE: 00            ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³         POINT         ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³³      000.000.000      ³";
+	cout << "³                                                                                             ³³                       ³";
+	cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ³  A,S,W,D: MOVE SNAKE  ³";
 	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿³                       ³";
-	cout << "³ LIFE TIME:                                                                                  ³³    ESC: PAUSE GAME    ³";
+	cout << "³LIFE TIME:                                                                                   ³³    ESC: PAUSE GAME    ³";
 	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ";
+	
+	//Set colors
+	SetTextColor(BACKGROUND_COLOR, INFO_TITLE_COLOR);
+	GotoXY(103, 1);
+	cout << "OBJECTIVE";
+	GotoXY(100, 10);
+	cout << "CURRENT LVL:";
+	GotoXY(99, 13);
+	cout << "SPEED:";
+	GotoXY(99, 15);
+	cout << "FOOD:";
+	GotoXY(99, 17);
+	cout << "LIFE:";
+	GotoXY(105, 21);
+	cout << "POINT";
+	GotoXY(1, 28);
+	cout << "LIFE TIME:";
+
 	//Update UI infomation
 	UpdateUIInfo(curLVL, 2, UI_LVL_X, UI_LVL_Y);
-	UpdateUIInfo(&snake.speed, 2, UI_SPEED_X, UI_SPEED_Y);
-}
-
-void UpdateFoodUI(const int& food) {
-	if (food < 10) GotoXY(2 + UI_FOOD_X, UI_FOOD_Y);
-	else if (food < 100) GotoXY(1 + UI_FOOD_X, UI_FOOD_Y);
-	else GotoXY(UI_FOOD_X, UI_FOOD_Y);
-	cout << food;
+	UpdateUIInfo(&snake->speed, 2, UI_SPEED_X, UI_SPEED_Y);
+	UpdateUIInfo(&gameLVL->maxFood, 3, UI_FOOD_X + 6, UI_FOOD_Y);
+	UpdateUIInfo(&snake->life, 2, UI_LIFE_X, UI_LIFE_Y);
+	UpdateLifeTime(gameLVL);
 }
 
 void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, const short& y) {
@@ -678,4 +699,15 @@ void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, con
 	}
 	GotoXY(x + maxLengthInfo - pos - 1, y);
 	cout << *info;
+}
+
+void UpdateLifeTime(const GameLVL* gameLVL) {
+	GotoXY(UI_TIMER_X, UI_TIMER_Y);
+	size_t LifeTimeBar = PA_DX - UI_TIMER_X + 1;
+	float percent = (float)gameLVL->timer / gameLVL->baseTimer;
+	if (percent > 0.5) SetTextColor(BACKGROUND_COLOR, 2);
+	else if (percent > 0.25) SetTextColor(BACKGROUND_COLOR, 6);
+	else SetTextColor(BACKGROUND_COLOR, 4);
+	if (gameLVL->timeLimit) cout << DrawAdjustBar(LifeTimeBar, percent);
+	else cout << DrawAdjustBar(LifeTimeBar, LifeTimeBar);
 }

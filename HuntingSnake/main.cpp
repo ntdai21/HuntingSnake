@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	//VARIABLES--------------------------------------------------------------------------------------------------------------------------------
 	int choose = 0; //Main menu choose. 0 = CONTINUE, 1 = NEW GAME, 2 = SETTINGS, 3 = QUIT.
 	GameLVL gameLVL;
@@ -35,14 +35,13 @@ int main() {
 				Play(&gameLVL, &snake, &curLVL);
 				ClearSquare({ PA_X, PA_Y, PA_DX, PA_DY });
 				
-				if (snake.food == gameLVL.maxFood) {
+				if (gameLVL.isWin) {
 					Win(&curLVL);
 					continue;
 				}
 				else {
-					Lose(&gameLVL, &snake, &curLVL);
-					isLose = 1;
-					break;
+					isLose = Lose(&gameLVL, &snake, &curLVL);
+					if (isLose) break;
 				}
 			}
 			break;
@@ -53,6 +52,7 @@ int main() {
 		}
 		
 	}
+	mciSendString(TEXT("close mp3"), NULL, 0, NULL);
 	cout << char(176);
 	system("pause");
 	return 0;
