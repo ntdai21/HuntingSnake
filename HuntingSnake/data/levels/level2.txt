@@ -37,5 +37,5 @@ FOOD_TO_SPEED_UP 1
 EXTRA_TIME_EACH_FOOD 10
 TIMER 120
 ---------------------------------------------Modes----------------------------------------------
-TIME_LIMIT 1
-CAN_SELF_TOUCHING 1
+TIME_LIMIT 0
+CAN_SELF_TOUCHING 0

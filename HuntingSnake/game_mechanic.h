@@ -5,9 +5,6 @@
 //Move snake in real time
 void MoveSnake(GameLVL* gameLVL, Snake* snake);
 
-//Draw snake
-void DrawSnake(const std::vector<COORD>& body, const std::vector<char>& parttern);
-
 //Call when eat food
 void GrowUp(Snake* snake);
 
@@ -34,7 +31,7 @@ bool LoadLVL(int* lvl, GameLVL* gameLVL, Snake* snake, bool* loadData);
 
 void ResetGameLVLAndSnakeData(GameLVL* gameLVL, Snake* snake);
 
-void TimeCountDown(size_t* timer);
+void TimeCountDown(size_t* timer, const bool* state);
 
 void CheckTimer(GameLVL* gameLVL, Snake* snake);
 

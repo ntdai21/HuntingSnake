@@ -87,7 +87,7 @@ struct Snake {
 	char curDirection = 'd';
 	bool state; //0 = dead, 1 = alive.
 	unsigned int point = 0;
-	int life = 1;
+	int life = 3;
 	int nextPattern = 0; // 0-31
 	std::string pattern = "21127587";
 };

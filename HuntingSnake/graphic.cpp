@@ -6,6 +6,7 @@
 using namespace std;
 
 void FixConsole() {
+	
 
 	//Set console window size
 	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -15,7 +16,7 @@ void FixConsole() {
 	lpConsoleWindow.Right = WINDOW_WIDTH;
 	lpConsoleWindow.Bottom = WINDOW_HEIGHT;
 	SetConsoleWindowInfo(hConsoleOutput, 1, &lpConsoleWindow); //Parameter '1' specifies the upper left corner as the coordinate angle
-	
+
 	//Set console screen buffer size
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD dwSize;
@@ -189,6 +190,17 @@ void DrawFood(const COORD* food) {
 	GotoXY(food->X, food->Y);
 	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
 	cout << '';
+}
+
+void DrawSnake(const Snake* snake) {
+	GotoXY(snake->body[0].X, snake->body[0].Y);
+	SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
+	cout << snake->bodyPattern[0];
+	for (int i = 1; i < snake->body.size(); i++) {
+		SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
+		GotoXY(snake->body[i].X, snake->body[i].Y);
+		cout << snake->bodyPattern[i];
+	}
 }
 
 void ScaleMenu(int& scale) {
@@ -724,26 +736,27 @@ void UpdateLifeTime(const GameLVL* gameLVL) {
 }
 
 int PauseMenu() {
+	ClearObjective();
 	//Selecting
 	int curChoose = 0; //Current choose
 	int colorChoose[2] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR }; //Color of each choose
 	char key;
 	while (true) {
 		// 0123 
-		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y);
+		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + 1);
 		SetTextColor(BACKGROUND_COLOR, colorChoose[0]);
 		//.......01234567890123456789012
 		cout << "  CONTINUE  ";
 
-		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + 1);
+		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + 2);
 		SetTextColor(BACKGROUND_COLOR, colorChoose[1]);
 		cout << "  MAIN MENU  ";
 		
 		SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
-		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + curChoose);
+		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + 1 + curChoose);
 		cout << '';
-		if (curChoose == 0) GotoXY(UI_OJECTIVE_X + 16, UI_OJECTIVE_Y + curChoose);
-		else GotoXY(UI_OJECTIVE_X + 17, UI_OJECTIVE_Y + curChoose);
+		if (curChoose == 0) GotoXY(UI_OJECTIVE_X + 16, UI_OJECTIVE_Y + 1 + curChoose);
+		else GotoXY(UI_OJECTIVE_X + 17, UI_OJECTIVE_Y + 1 + curChoose);
 		cout << '';
 
 		key = _getch();
@@ -780,3 +793,115 @@ void DrawGate(GameLVL* gameLVL, Snake* snake) {
 		cout << char(219);
 	}
 }
+
+void DrawObjective(const GameLVL* gameLVL) {
+	ClearObjective();
+	int pos = 0;
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
+	//"                       "
+	if (gameLVL->gateOpen) {
+		if (gameLVL->timeLimit) {
+			GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+			cout << CenterAlign("Enter a gate before", 23);
+			GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+			cout << CenterAlign("time out.", 23);
+		}
+		else {
+			GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+			cout << CenterAlign("Enter a gate.", 23);
+		}
+	}
+	else {
+		if (gameLVL->timeLimit) {
+			GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+			cout << CenterAlign("Eat enough food", 23);
+			GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+			cout << CenterAlign("before time out.", 23);
+		}
+		else {
+			GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+			cout << CenterAlign("Eat enough food.", 23);
+		}
+	}
+	pos++;
+	if (gameLVL->canSelfTouching) {
+		GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+		cout << CenterAlign("You can go through", 23);
+		GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + pos++);
+		cout << CenterAlign("your body.", 23);
+	}
+}
+
+void ClearObjective() {
+	ClearSquare({UI_OJECTIVE_X, UI_OJECTIVE_Y, 23, 5});
+}
+
+void WaitForReady(const GameLVL* gameLVL) {
+	ClearObjective();
+	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
+	GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + 2);
+	//cout << "     3...2...1...0     ";
+	cout << "     3";
+	for (int i = 1, j = 2; i < 14; i++) {
+		Sleep(250);
+		if (i % 4 == 0) cout << j--;
+		else cout << '.';
+	}
+	DrawObjective(gameLVL);
+}
+
+//void SettingMenu() {
+//	int curChoose = 0; //Current choose
+//	int colorChoose[4] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR }; //Color of each choose
+//	char key;
+//	int pos_X = 38;
+//	int pos_Y = 19;
+//	while (true) {
+//		// 0123 
+//		GotoXY(pos_X, pos_Y);
+//		SetTextColor(BACKGROUND_COLOR, colorChoose[0]);
+//		cout << "       SOUND VOLUME:";
+//
+//		GotoXY(pos_X, pos_Y + 1);
+//		SetTextColor(BACKGROUND_COLOR, colorChoose[1]);
+//		cout << "SOUND VOLUME:       ";
+//
+//		GotoXY(pos_X, pos_Y + 2);
+//		SetTextColor(BACKGROUND_COLOR, colorChoose[2]);
+//		cout << "SOUND VOLUME:       ";
+//
+//		GotoXY(pos_X, pos_Y + 3);
+//		SetTextColor(BACKGROUND_COLOR, colorChoose[3]);
+//		cout << "SOUND VOLUME:       ";
+//
+//		SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
+//		switch (curChoose)
+//		{
+//		case 0:
+//			GotoXY(pos_X - 2, pos_Y + curChoose);
+//			cout << '';
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		key = _getch();
+//		PlayMP3("menu_choosing");
+//		// 72: Up     80: Down    '\r': Enter
+//		if ((key == 'w' || key == 'W') && (curChoose >= 1 && curChoose <= 3)) {
+//			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
+//			curChoose--;
+//			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
+//		}
+//		else if ((key == 's' || key == 'S') && (curChoose >= 0 && curChoose <= 2)) {
+//			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
+//			curChoose++;
+//			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
+//		}
+//		else if (key == '\r') {
+//			PlayMP3("enter");
+//			ClearScreen();
+//			return;
+//		}
+//	}
+//}

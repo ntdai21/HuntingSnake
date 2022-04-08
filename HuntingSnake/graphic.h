@@ -40,6 +40,10 @@ void SetTextColor(const int& background, const int& text);
 //Draw map from file 
 void DrawWall(GameLVL& gameLVL);
 
+//Draw snake
+void DrawSnake(const Snake* snake);
+
+//Draw food
 void DrawFood(const COORD* food);
 
 //Draw menu for scale size of console window
@@ -90,3 +94,9 @@ void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, con
 int PauseMenu();
 
 void DrawGate(GameLVL* gameLVL, Snake* snake);
+
+void ClearObjective();
+
+void DrawObjective(const GameLVL* gameLVL);
+
+void WaitForReady(const GameLVL* gameLVL);

@@ -42,23 +42,14 @@ void MoveSnake(GameLVL* gameLVL, Snake* snake) {
 			SwapCOORD(snake->body[i - 1], snake->body[i]);
 		}
 		snake->body[0] = head;
-		DrawSnake(snake->body, snake->bodyPattern);
+		DrawSnake(snake);
 		CheckHitting(gameLVL, snake);
 		if (gameLVL->timeLimit) CheckTimer(gameLVL, snake);
 		Sleep(1000 / snake->speed);
 	}
 }
 
-void DrawSnake(const vector<COORD>& body, const vector<char>& parttern) {
-	GotoXY(body[0].X, body[0].Y);
-	SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
-	cout << parttern[0];
-	for (int i = 1; i < body.size(); i++) {
-		SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
-		GotoXY(body[i].X, body[i].Y);
-		cout << parttern[i];
-	}
-}
+
 
 void GrowUp(Snake* snake) {
 	int size = snake->body.size();
@@ -85,7 +76,6 @@ void CheckHitting(GameLVL* gameLVL, Snake* snake) {
 		snake->life--;
 		snake->state = 0;
 	}
-	
 }
 
 void CheckTimer(GameLVL* gameLVL, Snake* snake) {
@@ -115,6 +105,7 @@ void EatFood(GameLVL* gameLVL, Snake* snake) {
 			SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
 			cout << char(219);
 		}
+		DrawObjective(gameLVL);
 	}
 	UpdateUIInfo(&snake->food, 3, UI_FOOD_X, UI_FOOD_Y);
 	if (snake->food % gameLVL->foodToSpeedUp == 0) {
@@ -141,31 +132,31 @@ void Win(int* curLVL) {
 		PrintSubTextPA("GGWP! =)");
 		break;
 	case 1:
-		PrintSubTextPA("Sometimes by losing a battle you find a new way to win the war");
+		PrintSubTextPA("You are so good at this");
 		break;
 	case 2:
-		PrintSubTextPA("Take a break to get more energy");
+		PrintSubTextPA("GO, GO, GO...");
 		break;
 	case 3:
-		PrintSubTextPA("Ah! That was so close");
+		PrintSubTextPA("A quitter never wins and a winner never quits");
 		break;
 	case 4:
-		PrintSubTextPA("Believe in yourself");
+		PrintSubTextPA("OMG you did it!");
 		break;
 	case 5:
-		PrintSubTextPA("Don\'t worry! Just try again.");
+		PrintSubTextPA("Good job!");
 		break;
 	case 6:
-		PrintSubTextPA("Do not fear failure but rather fear not trying");
+		PrintSubTextPA("Well done");
 		break;
 	case 7:
-		PrintSubTextPA("Just because you fail once doesn\'t mean you\'re gonna fail at everything");
+		PrintSubTextPA("Perfect!");
 		break;
 	case 8:
-		PrintSubTextPA("Failure is mother\'s success");
+		PrintSubTextPA("That was so fast!");
 		break;
 	case 9:
-		PrintSubTextPA("Winning provides happiness, losing provides wisdom");
+		PrintSubTextPA("Keep going CHAMPION!");
 		break;
 	default:
 		break;
@@ -177,7 +168,9 @@ void Win(int* curLVL) {
 
 bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 	PlayMP3("die");
-	if (snake->life > 0) DrawTitlePlayArea("YOU DIE");
+	if (snake->life > 0) {
+		DrawTitlePlayArea("YOU DIE");
+	}
 	else {
 		DrawTitlePlayArea("YOU LOSE");
 		*curLVL = 1;
@@ -191,7 +184,7 @@ bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 		PrintSubTextPA("Don\'t worry! Just try again");
 		break;
 	case 1:
-		PrintSubTextPA("Sometimes by losing a battle you find a new way to win the war");
+		PrintSubTextPA("It does not matter how slowly you go as long as you do not stop");
 		break;
 	case 2:
 		PrintSubTextPA("Take a break to get more energy");
@@ -200,7 +193,7 @@ bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 		PrintSubTextPA("Ah! That was so close");
 		break;
 	case 4:
-		PrintSubTextPA("Believe in yourself");
+		PrintSubTextPA("Believe in yourself, you can do that");
 		break;
 	case 5:
 		PrintSubTextPA("Don\'t worry! Just try again.");
@@ -215,7 +208,7 @@ bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 		PrintSubTextPA("Failure is mother\'s success");
 		break;
 	case 9:
-		PrintSubTextPA("Winning provides happiness, losing provides wisdom");
+		PrintSubTextPA("You can\'t win unless you learn how to lose");
 		break;
 	default:
 		break;
@@ -256,12 +249,15 @@ void Play(GameLVL* gameLVL, Snake* snake, const int* curLVL) {
 	if (gameLVL->gateOpen) DrawGate(gameLVL, snake);
 	else if (gameLVL->food.X == -1) gameLVL->food = SpawnFood(&snake->body, &gameLVL->wall);
 	else DrawFood(&gameLVL->food);
+	DrawSnake(snake);
+	WaitForReady(gameLVL);
 	thread thread_1(MoveSnake, gameLVL, snake);
-	thread thread_2(TimeCountDown, &gameLVL->timer);
+	thread thread_2(TimeCountDown, &gameLVL->timer, &snake->state);
 	thread thread_3(KeyInputThread, curLVL, gameLVL, snake, thread_1.native_handle(), thread_2.native_handle());
-	thread_2.detach();
+	//thread_2.detach();
 	thread_3.detach();
 	thread_1.join();
+	if (thread_2.joinable()) thread_2.detach();
 }
 
 bool LoadLVL(int* lvl, GameLVL* gameLVL, Snake* snake, bool* loadData) {
@@ -272,6 +268,7 @@ bool LoadLVL(int* lvl, GameLVL* gameLVL, Snake* snake, bool* loadData) {
 	if (!fIn) {
 		PlayMP3("max_level");
 		*lvl = 1;
+		remove("data\\save.txt");
 		DrawTitlePlayArea("MAX LEVEL");
 		PrintSubTextPA("Congratulation! You have passed all levels");
 		_getch();
@@ -355,8 +352,8 @@ void ResetGameLVLAndSnakeData(GameLVL* gameLVL, Snake* snake) {
 	gameLVL->isWin = false;
 }
 
-void TimeCountDown(size_t* timer) {
-	while (*timer > 0) {
+void TimeCountDown(size_t* timer, const bool* state) {
+	while (*timer > 0 && *state) {
 		(*timer) -= 1;
 		Sleep(1000);
 	}
@@ -372,6 +369,7 @@ void PauseGame(HANDLE thrd1, HANDLE thrd2, const int* curLVL, GameLVL* gameLVL, 
 		gameLVL->quit = 1;
 		snake->state = 0;
 	}
+	WaitForReady(gameLVL);
 	ResumeThread(thrd1);
 	ResumeThread(thrd2);
 }
