@@ -33,8 +33,8 @@
 
 //Game UI position
 	//OBJECTIVE
-#define UI_OJECTIVE_X 103
-#define UI_OJECTIVE_Y 1
+#define UI_OJECTIVE_X 96
+#define UI_OJECTIVE_Y 3
 	//CURRENT LVL
 #define UI_LVL_X 113
 #define UI_LVL_Y 10
@@ -63,7 +63,7 @@
 struct GameLVL {
 	int maxFood = 6; //Maximum amount of food can be collected in this level.
 	std::vector<COORD> wall; //Wall positions.
-	COORD food; //Food position.
+	COORD food = { -1, -1 }; //Food position.
 	int foodToSpeedUp = 5; //Amount of food to increase speed.
 	float extraTimePerFood;
 	size_t timer = 20;
@@ -74,6 +74,8 @@ struct GameLVL {
 	bool gateOpen = false;
 	std::vector<COORD> gate;
 	bool isWin = false;
+	int maxSizeSnake = 0;
+	bool quit = 0;
 };
 
 struct Snake {
@@ -85,7 +87,7 @@ struct Snake {
 	char curDirection = 'd';
 	bool state; //0 = dead, 1 = alive.
 	unsigned int point = 0;
-	int life = 3;
+	int life = 1;
 	int nextPattern = 0; // 0-31
 	std::string pattern = "21127587";
 };

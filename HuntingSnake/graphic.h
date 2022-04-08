@@ -10,6 +10,7 @@
 #include <ctime>
 #include <thread>
 #include <mmsystem.h>
+#include <stdio.h>
 
 //Usable characters: • Ö ö × ¤ « » 
 
@@ -39,13 +40,15 @@ void SetTextColor(const int& background, const int& text);
 //Draw map from file 
 void DrawWall(GameLVL& gameLVL);
 
+void DrawFood(const COORD* food);
+
 //Draw menu for scale size of console window
 void ScaleMenu(int& scale);
 
 //Draw adjust bar showing percentage
 std::string DrawAdjustBar(const int& width, const float& fill);
 
-void KeyInputThread(char *direct, bool *snakeState);
+void KeyInputThread(const int* curLVL, GameLVL* gameLVL, Snake* snake, HANDLE thrd1, HANDLE thrd2);
 
 void SwapCOORD(COORD& A, COORD& B);
 
@@ -84,4 +87,6 @@ void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL);
 	//Update UI
 void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, const short& y);
 
+int PauseMenu();
 
+void DrawGate(GameLVL* gameLVL, Snake* snake);

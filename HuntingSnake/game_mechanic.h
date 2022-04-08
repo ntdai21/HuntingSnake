@@ -30,7 +30,7 @@ COORD SpawnFood(const std::vector<COORD>* body, const std::vector<COORD>* wall);
 //Play
 void Play(GameLVL* gameLVL, Snake* snake, const int* curLVL);
 
-bool LoadLVL(const int* lvl, GameLVL* gameLVL, Snake* snake);
+bool LoadLVL(int* lvl, GameLVL* gameLVL, Snake* snake, bool* loadData);
 
 void ResetGameLVLAndSnakeData(GameLVL* gameLVL, Snake* snake);
 
@@ -39,3 +39,9 @@ void TimeCountDown(size_t* timer);
 void CheckTimer(GameLVL* gameLVL, Snake* snake);
 
 void UpdateLifeTime(const GameLVL* gameLVL);
+
+void PauseGame(HANDLE thrd1, HANDLE thrd2, const int* curLVL, GameLVL* gameLVL, Snake* snake);
+
+void SaveData(const int* curLVL, const GameLVL* gameLVL, const Snake* snake);
+
+bool LoadData(int* curLVL, GameLVL* gameLVL, Snake* snake);

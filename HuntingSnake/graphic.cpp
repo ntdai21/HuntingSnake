@@ -48,6 +48,7 @@ void FixConsole() {
 
 void DrawTitle1() {
 	//Ü ß Û
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	GotoXY(0, 5);
 	cout << "                ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ                ";
 	cout << "                Û                                                                                      Û                ";
@@ -91,6 +92,7 @@ void MainMenu(int* choose) {
 		SetTextColor(BACKGROUND_COLOR, colorChoose[3]);
 		cout << "    QUIT    ";
 
+		SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
 		if (curChoose != 3) {
 			GotoXY(54, 19 + curChoose);
 			cout << '';
@@ -176,13 +178,17 @@ void SetTextColor(const int& background, const int& text) {
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 16 * background + text);
 }
 
-
-
 void DrawWall(GameLVL& gameLVL) {
 	for (COORD i : gameLVL.wall) {
 		GotoXY(i.X, i.Y);
 		cout << '²';
 	}
+}
+
+void DrawFood(const COORD* food) {
+	GotoXY(food->X, food->Y);
+	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
+	cout << '';
 }
 
 void ScaleMenu(int& scale) {
@@ -217,31 +223,32 @@ string DrawAdjustBar(const int& width, const float& fill) {
 	return bar;
 }
 
-void KeyInputThread(char *direct, bool *snakeState) {
+void KeyInputThread(const int* curLVL, GameLVL* gameLVL, Snake* snake, HANDLE thrd1, HANDLE thrd2) {
 	char key = 'A';
-	while (*snakeState) {
+	while (snake->state) {
 		key = _getch();
 		switch (key)
 		{
 		case 'a':
 		case 'A':
-			*direct = 'a';
+			snake->curDirection = 'a';
 			break;
 		case 'd':
 		case 'D':
-			*direct = 'd';
+			snake->curDirection = 'd';
 			break;
 		case 'w':
 		case 'W':
-			*direct = 'w';
+			snake->curDirection = 'w';
 			break;
 		case 's':
 		case 'S':
-			*direct = 's';
+			snake->curDirection = 's';
 			break;
+		case 27:
 		case 'p':
 		case 'P':
-			*snakeState = 0;
+			PauseGame(thrd1, thrd2, curLVL, gameLVL, snake);
 		default:
 			break;
 		}
@@ -598,6 +605,7 @@ void DrawTitlePlayArea(const string& str) {
 }
 
 void PrintSubTextPA(const string& str) {
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	GotoXY(PA_X , TEXT_SUB_PA);
 	cout << CenterAlign(str, PA_DX );
 }
@@ -633,6 +641,7 @@ void CenterSquareInSquare(const Square& bigSquare, Square* smallSquare) {
 
 void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 	//¿ À À Ú Ù ³ Ä
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	GotoXY(0, 0);
 	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿";
 	cout << "³                                                                                             ³³       OBJECTIVE       ³";
@@ -662,7 +671,7 @@ void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 	cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
 	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ³  A,S,W,D: MOVE SNAKE  ³";
 	cout << "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿³                       ³";
-	cout << "³LIFE TIME:                                                                                   ³³    ESC: PAUSE GAME    ³";
+	cout << "³LIFE TIME:                                                                                   ³³   ESC, P: PAUSE GAME  ³";
 	cout << "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ";
 	
 	//Set colors
@@ -685,6 +694,7 @@ void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 	//Update UI infomation
 	UpdateUIInfo(curLVL, 2, UI_LVL_X, UI_LVL_Y);
 	UpdateUIInfo(&snake->speed, 2, UI_SPEED_X, UI_SPEED_Y);
+	UpdateUIInfo(&snake->food, 3, UI_FOOD_X, UI_FOOD_Y);
 	UpdateUIInfo(&gameLVL->maxFood, 3, UI_FOOD_X + 6, UI_FOOD_Y);
 	UpdateUIInfo(&snake->life, 2, UI_LIFE_X, UI_LIFE_Y);
 	UpdateLifeTime(gameLVL);
@@ -693,6 +703,7 @@ void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 void UpdateUIInfo(const int* info, const int& maxLengthInfo, const short& x, const short& y) {
 	int maxLength = *info;
 	int pos = 0;
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	while (maxLength >= 10) {
 		maxLength /= 10;
 		pos++;
@@ -710,4 +721,62 @@ void UpdateLifeTime(const GameLVL* gameLVL) {
 	else SetTextColor(BACKGROUND_COLOR, 4);
 	if (gameLVL->timeLimit) cout << DrawAdjustBar(LifeTimeBar, percent);
 	else cout << DrawAdjustBar(LifeTimeBar, LifeTimeBar);
+}
+
+int PauseMenu() {
+	//Selecting
+	int curChoose = 0; //Current choose
+	int colorChoose[2] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR }; //Color of each choose
+	char key;
+	while (true) {
+		// 0123 
+		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y);
+		SetTextColor(BACKGROUND_COLOR, colorChoose[0]);
+		//.......01234567890123456789012
+		cout << "  CONTINUE  ";
+
+		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + 1);
+		SetTextColor(BACKGROUND_COLOR, colorChoose[1]);
+		cout << "  MAIN MENU  ";
+		
+		SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
+		GotoXY(UI_OJECTIVE_X + 5, UI_OJECTIVE_Y + curChoose);
+		cout << '';
+		if (curChoose == 0) GotoXY(UI_OJECTIVE_X + 16, UI_OJECTIVE_Y + curChoose);
+		else GotoXY(UI_OJECTIVE_X + 17, UI_OJECTIVE_Y + curChoose);
+		cout << '';
+
+		key = _getch();
+		PlayMP3("menu_choosing");
+		// 72: Up     80: Down    '\r': Enter
+		if ((key == 'w' || key == 'W') && (curChoose == 1 )) {
+			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
+			curChoose--;
+			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
+		}
+		else if ((key == 's' || key == 'S') && (curChoose == 0)) {
+			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
+			curChoose++;
+			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
+		}
+		else if (key == '\r') {
+			PlayMP3("enter");
+			break;
+		}
+	}
+	return curChoose;
+}
+
+void DrawGate(GameLVL* gameLVL, Snake* snake) {
+	gameLVL->gateOpen = true;
+	if (gameLVL->gate.size() == 0) {
+		snake->state = 0;
+		gameLVL->isWin = 1;
+		return;
+	}
+	for (COORD& i : gameLVL->gate) {
+		GotoXY(i.X, i.Y);
+		SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
+		cout << char(219);
+	}
 }
