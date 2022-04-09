@@ -60,12 +60,23 @@ void DrawTitle1() {
 	cout << "                Û  ²   ²  ²²²²²  ²   ²    ²    ²²²²²  ²   ²  ²²²²²  ²²²²²  ²   ²  ²   ²  ²   ²  ²²²²²  Û                ";
 	cout << "                Û                                                                                      Û                ";
 	cout << "                ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                    ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                ";
-	Title title = CreateTitle("HUNTINGSNAKE", INFO_TITLE_COLOR, char(219));
+	Title title = CreateTitle("HUNTINGSNAKE");
 	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
 	CenterSquareInSquare({ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - 10 }, &titleSquare);
 	DrawTitle({ titleSquare.x, titleSquare.y }, title);
 	GotoXY(52, 13);
 	cout << "MADE BY GROUP 12";
+	ifstream fIn;
+	size_t highestPoint = 0;
+	fIn.open("data\\HighestPoint.txt", ios::in);
+	if (fIn.is_open()) {
+		fIn >> highestPoint;
+		fIn.close();
+	}
+	GotoXY(0, 15);
+	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
+	string str = "Highest Score: " + to_string(highestPoint);
+	cout << CenterAlign(str, WINDOW_WIDTH);
 }
 
 void MainMenu(int* choose) {
@@ -73,7 +84,7 @@ void MainMenu(int* choose) {
 	DrawTitle1();
 	//Selecting
 	int curChoose = 0; //Current choose
-	int colorChoose[4] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR }; //Color of each choose
+	int colorChoose[3] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR}; //Color of each choose
 	char key;
 	while (true) {
 		// 0123 
@@ -87,14 +98,10 @@ void MainMenu(int* choose) {
 
 		GotoXY(54, 21);
 		SetTextColor(BACKGROUND_COLOR, colorChoose[2]);
-		cout << "  SETTINGS  ";
-
-		GotoXY(54, 22);
-		SetTextColor(BACKGROUND_COLOR, colorChoose[3]);
 		cout << "    QUIT    ";
 
 		SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
-		if (curChoose != 3) {
+		if (curChoose != 2) {
 			GotoXY(54, 19 + curChoose);
 			cout << '';
 			GotoXY(65, 19 + curChoose);
@@ -110,12 +117,12 @@ void MainMenu(int* choose) {
 		key = _getch();
 		PlayMP3("menu_choosing");
 		// 72: Up     80: Down    '\r': Enter
-		if ((key == 'w' || key == 'W') && (curChoose >= 1 && curChoose <= 3)) {
+		if ((key == 'w' || key == 'W') && (curChoose >= 1 && curChoose <= 2)) {
 			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
 			curChoose--;
 			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
 		}
-		else if ((key == 's' || key == 'S') && (curChoose >= 0 && curChoose <= 2)) {
+		else if ((key == 's' || key == 'S') && (curChoose >= 0 && curChoose <= 1)) {
 			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
 			curChoose++;
 			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
@@ -180,16 +187,24 @@ void SetTextColor(const int& background, const int& text) {
 }
 
 void DrawWall(GameLVL& gameLVL) {
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	for (COORD i : gameLVL.wall) {
 		GotoXY(i.X, i.Y);
 		cout << '²';
 	}
 }
 
-void DrawFood(const COORD* food) {
+void DrawFood(const COORD* food, const bool* isLifeFood) {
 	GotoXY(food->X, food->Y);
-	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
-	cout << '';
+	if (*isLifeFood) {
+		SetTextColor(BACKGROUND_COLOR, LIFE_FOOD_COLOR);
+		cout << char(3);
+	}
+	else {
+		SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
+		cout << '';
+	}
+	
 }
 
 void DrawSnake(const Snake* snake) {
@@ -282,10 +297,8 @@ int FindInCOORD(const COORD& var, const vector<COORD>& arr) {
 
 //TITLE------------------------------------------------------------------------------------------------------------------------------------
 
-Title CreateTitle(const string& str, const int& color, const char& pattern) {
+Title CreateTitle(const string& str) {
 	Title title;
-	title.color = color;
-	title.pattern = pattern;
 	for (int i = 0; i < str.size(); i++) {
 		//Create space between 2 big characters
 		if (i != 0) {
@@ -298,211 +311,211 @@ Title CreateTitle(const string& str, const int& color, const char& pattern) {
 		{
 		case 'a':
 		case 'A':
-			title.text[0] += "00000";
-			title.text[1] += "0   0";
-			title.text[2] += "00000";
-			title.text[3] += "0   0";
-			title.text[4] += "0   0";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "Û   Û";
+			title.text[4] += "Û   Û";
 			break;
 		case 'b':
 		case 'B':
-			title.text[0] += "0000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "0000 ";
-			title.text[3] += "0   0";
-			title.text[4] += "0000 ";
+			title.text[0] += "ÛÛÛÛ ";
+			title.text[1] += "Û  ßÛ";
+			title.text[2] += "ÛÛÛÛ ";
+			title.text[3] += "Û  ßÛ";
+			title.text[4] += "ÛÛÛÛ ";
 			break;
 		case 'c':
 		case 'C':
-			title.text[0] += "00000";
-			title.text[1] += "0    ";
-			title.text[2] += "0    ";
-			title.text[3] += "0    ";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û    ";
+			title.text[2] += "Û    ";
+			title.text[3] += "Û    ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'd':
 		case 'D':
-			title.text[0] += "0000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "0   0";
-			title.text[3] += "0   0";
-			title.text[4] += "0000 ";
+			title.text[0] += "ÛÛÛÛ ";
+			title.text[1] += "Û  ßÛ";
+			title.text[2] += "Û   Û";
+			title.text[3] += "Û  ÜÛ";
+			title.text[4] += "ÛÛÛÛ ";
 			break;
 		case 'e':
 		case 'E':
-			title.text[0] += "00000";
-			title.text[1] += "0    ";
-			title.text[2] += "00000";
-			title.text[3] += "0    ";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û    ";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "Û    ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'f':
 		case 'F':
-			title.text[0] += "00000";
-			title.text[1] += "0    ";
-			title.text[2] += "00000";
-			title.text[3] += "0    ";
-			title.text[4] += "0    ";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û    ";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "Û    ";
+			title.text[4] += "Û    ";
 			break;
 		case 'g':
 		case 'G':
-			title.text[0] += "00000";
-			title.text[1] += "0    ";
-			title.text[2] += "0 000";
-			title.text[3] += "0   0";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û    ";
+			title.text[2] += "Û ÛÛÛ";
+			title.text[3] += "Û   Û";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'h':
 		case 'H':
-			title.text[0] += "0   0";
-			title.text[1] += "0   0";
-			title.text[2] += "00000";
-			title.text[3] += "0   0";
-			title.text[4] += "0   0";
+			title.text[0] += "Û   Û";
+			title.text[1] += "Û   Û";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "Û   Û";
+			title.text[4] += "Û   Û";
 			break;
 		case 'i':
 		case 'I':
-			title.text[0] += "00000";
-			title.text[1] += "  0  ";
-			title.text[2] += "  0  ";
-			title.text[3] += "  0  ";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "  Û  ";
+			title.text[2] += "  Û  ";
+			title.text[3] += "  Û  ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'j':
 		case 'J':
-			title.text[0] += "00000";
-			title.text[1] += "   0 ";
-			title.text[2] += "   0 ";
-			title.text[3] += "   0 ";
-			title.text[4] += "000  ";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "   Û ";
+			title.text[2] += "   Û ";
+			title.text[3] += "  ÜÛ ";
+			title.text[4] += "ÛÛÛ  ";
 			break;
 		case 'k':
 		case 'K':
-			title.text[0] += "0   0";
-			title.text[1] += "0  0 ";
-			title.text[2] += "000  ";
-			title.text[3] += "0  0 ";
-			title.text[4] += "0   0";
+			title.text[0] += "Û  ÜÛ";
+			title.text[1] += "Û ÜÛ ";
+			title.text[2] += "ÛÛÛ  ";
+			title.text[3] += "Û ßÛ ";
+			title.text[4] += "Û  ßÛ";
 			break;
 		case 'l':
 		case 'L':
-			title.text[0] += "0    ";
-			title.text[1] += "0    ";
-			title.text[2] += "0    ";
-			title.text[3] += "0    ";
-			title.text[4] += "00000";
+			title.text[0] += "Û    ";
+			title.text[1] += "Û    ";
+			title.text[2] += "Û    ";
+			title.text[3] += "Û    ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'm':
 		case 'M':
-			title.text[0] += "00 00";
-			title.text[1] += "0 0 0";
-			title.text[2] += "0 0 0";
-			title.text[3] += "0   0";
-			title.text[4] += "0   0";
+			title.text[0] += "ÛÜ ÜÛ";
+			title.text[1] += "ÛßÛßÛ";
+			title.text[2] += "Û Û Û";
+			title.text[3] += "Û   Û";
+			title.text[4] += "Û   Û";
 			break;
 		case 'n':
 		case 'N':
-			title.text[0] += "0   0";
-			title.text[1] += "00  0";
-			title.text[2] += "0 0 0";
-			title.text[3] += "0  00";
-			title.text[4] += "0   0";
+			title.text[0] += "ÛÜ  Û";
+			title.text[1] += "ÛÛÜ Û";
+			title.text[2] += "Û ÛÜÛ";
+			title.text[3] += "Û  ÛÛ";
+			title.text[4] += "Û   Û";
 			break;
 		case 'o':
 		case 'O':
-			title.text[0] += "00000";
-			title.text[1] += "0   0";
-			title.text[2] += "0   0";
-			title.text[3] += "0   0";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "Û   Û";
+			title.text[3] += "Û   Û";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'p':
 		case 'P':
-			title.text[0] += "00000";
-			title.text[1] += "0   0";
-			title.text[2] += "00000";
-			title.text[3] += "0    ";
-			title.text[4] += "0    ";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "Û    ";
+			title.text[4] += "Û    ";
 			break;
 		case 'q':
 		case 'Q':
-			title.text[0] += "00000";
-			title.text[1] += "0   0";
-			title.text[2] += "0   0";
-			title.text[3] += "0  00";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "Û   Û";
+			title.text[3] += "Û  ÛÛ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'r':
 		case 'R':
-			title.text[0] += "0000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "0000 ";
-			title.text[3] += "0   0";
-			title.text[4] += "0   0";
+			title.text[0] += "ÛÛÛÛ ";
+			title.text[1] += "Û  ßÛ";
+			title.text[2] += "ÛÛÛÛ ";
+			title.text[3] += "Û  ßÛ";
+			title.text[4] += "Û   Û";
 			break;
 		case 's':
 		case 'S':
-			title.text[0] += "00000";
-			title.text[1] += "0    ";
-			title.text[2] += "00000";
-			title.text[3] += "    0";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û    ";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "    Û";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 't':
 		case 'T':
-			title.text[0] += "00000";
-			title.text[1] += "  0  ";
-			title.text[2] += "  0  ";
-			title.text[3] += "  0  ";
-			title.text[4] += "  0  ";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "  Û  ";
+			title.text[2] += "  Û  ";
+			title.text[3] += "  Û  ";
+			title.text[4] += "  Û  ";
 			break;
 		case 'u':
 		case 'U':
-			title.text[0] += "0   0";
-			title.text[1] += "0   0";
-			title.text[2] += "0   0";
-			title.text[3] += "0   0";
-			title.text[4] += "00000";
+			title.text[0] += "Û   Û";
+			title.text[1] += "Û   Û";
+			title.text[2] += "Û   Û";
+			title.text[3] += "Û   Û";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case 'v':
 		case 'V':
-			title.text[0] += "0   0";
-			title.text[1] += "0   0";
-			title.text[2] += " 0 0 ";
-			title.text[3] += " 0 0 ";
-			title.text[4] += "  0  ";
+			title.text[0] += "Û   Û";
+			title.text[1] += "Û   Û";
+			title.text[2] += "ßÛ Ûß";
+			title.text[3] += " Û Û ";
+			title.text[4] += " ßÛß ";
 			break;
 		case 'w':
 		case 'W':
-			title.text[0] += "0   0";
-			title.text[1] += "0   0";
-			title.text[2] += "0 0 0";
-			title.text[3] += "0 0 0";
-			title.text[4] += "00 00";
+			title.text[0] += "Û   Û";
+			title.text[1] += "Û   Û";
+			title.text[2] += "Û Û Û";
+			title.text[3] += "ÛÜÛÜÛ";
+			title.text[4] += "Ûß ßÛ";
 			break;
 		case 'x':
 		case 'X':
-			title.text[0] += "0   0";
-			title.text[1] += " 0 0 ";
-			title.text[2] += "  0  ";
-			title.text[3] += " 0 0 ";
-			title.text[4] += "0   0";
+			title.text[0] += "Û   Û";
+			title.text[1] += " Û Û ";
+			title.text[2] += "  Û  ";
+			title.text[3] += " Û Û ";
+			title.text[4] += "Û   Û";
 			break;
 		case 'y':
 		case 'Y':
-			title.text[0] += "0   0";
-			title.text[1] += " 0 0 ";
-			title.text[2] += "  0  ";
-			title.text[3] += "  0  ";
-			title.text[4] += "  0  ";
+			title.text[0] += "Û   Û";
+			title.text[1] += "ßÛ Ûß";
+			title.text[2] += " ßÛß ";
+			title.text[3] += "  Û  ";
+			title.text[4] += "  Û  ";
 			break;
 		case 'z':
 		case 'Z':
-			title.text[0] += "00000";
-			title.text[1] += "   0 ";
-			title.text[2] += "  0  ";
-			title.text[3] += " 0   ";
-			title.text[4] += "00000";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "   Û ";
+			title.text[2] += "  Û  ";
+			title.text[3] += " Û   ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case ' ':
 			title.text[0] += "     ";
@@ -512,93 +525,80 @@ Title CreateTitle(const string& str, const int& color, const char& pattern) {
 			title.text[4] += "     ";
 			break;
 		case '0':
-			title.text[0] += " 000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "0   0";
-			title.text[3] += "0   0";
-			title.text[4] += " 000 ";
+			title.text[0] += " ÛÛÛ ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "Û   Û";
+			title.text[3] += "Û   Û";
+			title.text[4] += " ÛÛÛ ";
 			break;
 		case '1':
-			title.text[0] += "  00 ";
-			title.text[1] += " 0 0 ";
-			title.text[2] += "0  0 ";
-			title.text[3] += "   0 ";
-			title.text[4] += "00000";
+			title.text[0] += "  ÛÛ ";
+			title.text[1] += " Û Û ";
+			title.text[2] += "Û  Û ";
+			title.text[3] += "   Û ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case '2':
-			title.text[0] += " 000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "   0 ";
-			title.text[3] += "  0  ";
-			title.text[4] += "00000";
+			title.text[0] += " ÛÛÛ ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "   Û ";
+			title.text[3] += "  Û  ";
+			title.text[4] += "ÛÛÛÛÛ";
 			break;
 		case '3':
-			title.text[0] += " 000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "  00 ";
-			title.text[3] += "0   0";
-			title.text[4] += " 000 ";
+			title.text[0] += " ÛÛÛ ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "  ÛÛ ";
+			title.text[3] += "Û   Û";
+			title.text[4] += " ÛÛÛ ";
 			break;
 		case '4':
-			title.text[0] += "   0 ";
-			title.text[1] += "  0  ";
-			title.text[2] += " 0 0 ";
-			title.text[3] += "00000";
-			title.text[4] += "   0 ";
+			title.text[0] += "   Û ";
+			title.text[1] += "  Û  ";
+			title.text[2] += " Û Û ";
+			title.text[3] += "ÛÛÛÛÛ";
+			title.text[4] += "   Û ";
 			break;
 		case '5':
-			title.text[0] += "00000";
-			title.text[1] += "0    ";
-			title.text[2] += " 000 ";
-			title.text[3] += "    0";
-			title.text[4] += "0000 ";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "Û    ";
+			title.text[2] += " ÛÛÛ ";
+			title.text[3] += "    Û";
+			title.text[4] += "ÛÛÛÛ ";
 			break;
 		case '6':
-			title.text[0] += " 000 ";
-			title.text[1] += "0    ";
-			title.text[2] += "00000";
-			title.text[3] += "0   0";
-			title.text[4] += " 000 ";
+			title.text[0] += " ÛÛÛ ";
+			title.text[1] += "Û    ";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "Û   Û";
+			title.text[4] += " ÛÛÛ ";
 			break;
 		case '7':
-			title.text[0] += "00000";
-			title.text[1] += "   0 ";
-			title.text[2] += "  0  ";
-			title.text[3] += " 0   ";
-			title.text[4] += " 0   ";
+			title.text[0] += "ÛÛÛÛÛ";
+			title.text[1] += "   Û ";
+			title.text[2] += "  Û  ";
+			title.text[3] += " Û   ";
+			title.text[4] += " Û   ";
 			break;
 		case '8':
-			title.text[0] += " 000 ";
-			title.text[1] += "0   0";
-			title.text[2] += " 000 ";
-			title.text[3] += "0   0";
-			title.text[4] += " 000 ";
+			title.text[0] += " ÛÛÛ ";
+			title.text[1] += "Û   Û";
+			title.text[2] += " ÛÛÛ ";
+			title.text[3] += "Û   Û";
+			title.text[4] += " ÛÛÛ ";
 			break;
 		case '9':
-			title.text[0] += " 000 ";
-			title.text[1] += "0   0";
-			title.text[2] += "00000";
-			title.text[3] += "    0";
-			title.text[4] += " 000 ";
+			title.text[0] += " ÛÛÛ ";
+			title.text[1] += "Û   Û";
+			title.text[2] += "ÛÛÛÛÛ";
+			title.text[3] += "    Û";
+			title.text[4] += " ÛÛÛ ";
 			break;
 		default:
 			break;
 		}
 	}
-	ReplacePatternTitle(title, pattern);
 	return title;
-}
-
-void ReplaceCharacterString(string& str, const char& oldChar, const char& newChar) {
-	for (int i = 0; i < str.size(); i++) {
-		if (str.at(i) == oldChar) str.at(i) = newChar;
-	}
-}
-
-void ReplacePatternTitle(Title& title, const char& pattern) {
-	for (int i = 0; i < 5; i++) {
-		ReplaceCharacterString(title.text[i], '0', pattern);
-	}
 }
 
 void DrawTitle(const COORD& pos, const Title& title) {
@@ -610,7 +610,7 @@ void DrawTitle(const COORD& pos, const Title& title) {
 }
 
 void DrawTitlePlayArea(const string& str) {
-	Title title = CreateTitle(str, 7, char(219));
+	Title title = CreateTitle(str);
 	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
 	CenterSquareInSquare({ PA_X, PA_Y, PA_DX, PA_DY }, &titleSquare);
 	DrawTitle({ titleSquare.x, titleSquare.y }, title);
@@ -668,7 +668,7 @@ void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 	cout << "³                                                                                             ³³    CURRENT LVL: 00    ³";
 	cout << "³                                                                                             ³ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
 	cout << "³                                                                                             ³³                       ³";
-	cout << "³                                                                                             ³³   SPEED: 00 cell/s    ³";
+	cout << "³                                                                                             ³³   SPEED: 00 cells/sec ³";
 	cout << "³                                                                                             ³³                       ³";
 	cout << "³                                                                                             ³³   FOOD: 000 / 000     ³";
 	cout << "³                                                                                             ³³                       ³";
@@ -705,10 +705,12 @@ void DrawInfoUI(const GameLVL* gameLVL, const Snake* snake, const int* curLVL) {
 
 	//Update UI infomation
 	UpdateUIInfo(curLVL, 2, UI_LVL_X, UI_LVL_Y);
+	setprecision(2);
 	UpdateUIInfo(&snake->speed, 2, UI_SPEED_X, UI_SPEED_Y);
 	UpdateUIInfo(&snake->food, 3, UI_FOOD_X, UI_FOOD_Y);
 	UpdateUIInfo(&gameLVL->maxFood, 3, UI_FOOD_X + 6, UI_FOOD_Y);
 	UpdateUIInfo(&snake->life, 2, UI_LIFE_X, UI_LIFE_Y);
+	UpdatePoint(snake->point);
 	UpdateLifeTime(gameLVL);
 }
 
@@ -840,6 +842,7 @@ void WaitForReady(const GameLVL* gameLVL) {
 	ClearObjective();
 	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
 	GotoXY(UI_OJECTIVE_X, UI_OJECTIVE_Y + 2);
+	PlayMP3("count_down_3");
 	//cout << "     3...2...1...0     ";
 	cout << "     3";
 	for (int i = 1, j = 2; i < 14; i++) {
@@ -850,58 +853,15 @@ void WaitForReady(const GameLVL* gameLVL) {
 	DrawObjective(gameLVL);
 }
 
-//void SettingMenu() {
-//	int curChoose = 0; //Current choose
-//	int colorChoose[4] = { BUTTON_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR, NORMAL_TEXT_COLOR }; //Color of each choose
-//	char key;
-//	int pos_X = 38;
-//	int pos_Y = 19;
-//	while (true) {
-//		// 0123 
-//		GotoXY(pos_X, pos_Y);
-//		SetTextColor(BACKGROUND_COLOR, colorChoose[0]);
-//		cout << "       SOUND VOLUME:";
-//
-//		GotoXY(pos_X, pos_Y + 1);
-//		SetTextColor(BACKGROUND_COLOR, colorChoose[1]);
-//		cout << "SOUND VOLUME:       ";
-//
-//		GotoXY(pos_X, pos_Y + 2);
-//		SetTextColor(BACKGROUND_COLOR, colorChoose[2]);
-//		cout << "SOUND VOLUME:       ";
-//
-//		GotoXY(pos_X, pos_Y + 3);
-//		SetTextColor(BACKGROUND_COLOR, colorChoose[3]);
-//		cout << "SOUND VOLUME:       ";
-//
-//		SetTextColor(BACKGROUND_COLOR, BUTTON_TEXT_COLOR);
-//		switch (curChoose)
-//		{
-//		case 0:
-//			GotoXY(pos_X - 2, pos_Y + curChoose);
-//			cout << '';
-//			break;
-//		default:
-//			break;
-//		}
-//
-//		key = _getch();
-//		PlayMP3("menu_choosing");
-//		// 72: Up     80: Down    '\r': Enter
-//		if ((key == 'w' || key == 'W') && (curChoose >= 1 && curChoose <= 3)) {
-//			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
-//			curChoose--;
-//			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
-//		}
-//		else if ((key == 's' || key == 'S') && (curChoose >= 0 && curChoose <= 2)) {
-//			colorChoose[curChoose] = NORMAL_TEXT_COLOR;
-//			curChoose++;
-//			colorChoose[curChoose] = BUTTON_TEXT_COLOR;
-//		}
-//		else if (key == '\r') {
-//			PlayMP3("enter");
-//			ClearScreen();
-//			return;
-//		}
-//	}
-//}
+void UpdatePoint(int point) {
+	string str = "000.000.000";
+	int digit = 10;
+	while (point) {
+		str.at(digit--) = char(point % 10 + 48);
+		point /= 10;
+		if (digit == 7 || digit == 3) digit--;
+	}
+	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
+	GotoXY(UI_POINT_X, UI_POINT_Y);
+	cout << str;
+}

@@ -44,7 +44,7 @@ void DrawWall(GameLVL& gameLVL);
 void DrawSnake(const Snake* snake);
 
 //Draw food
-void DrawFood(const COORD* food);
+void DrawFood(const COORD* food, const bool* isLifeFood);
 
 //Draw menu for scale size of console window
 void ScaleMenu(int& scale);
@@ -60,11 +60,10 @@ int FindInCOORD(const COORD& var, const std::vector<COORD>& arr);
 
 //TITLE------------------------------------------------------------------------------------------------------------------------------------
 	//Create a title from a string
-Title CreateTitle(const std::string& str, const int& color, const char& pattern);
+Title CreateTitle(const std::string& str);
 	//Replace old character to new one in a string;
 void ReplaceCharacterString(std::string& str, const char& oldChar, const char& newChar);
 	//Replace old pattern to new one in a title
-void ReplacePatternTitle(Title& title, const char& pattern);
 	//Draw title
 void DrawTitle(const COORD& pos, const Title& title);
 	//Draw title in center play area
@@ -100,3 +99,5 @@ void ClearObjective();
 void DrawObjective(const GameLVL* gameLVL);
 
 void WaitForReady(const GameLVL* gameLVL);
+
+void UpdatePoint(int point);

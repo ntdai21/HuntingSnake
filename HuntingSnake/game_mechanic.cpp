@@ -86,8 +86,15 @@ void CheckTimer(GameLVL* gameLVL, Snake* snake) {
 }
 
 void EatFood(GameLVL* gameLVL, Snake* snake) {
-	PlayMP3("eat_food");
+	//PlayMP3("eat_food");
 	snake->food++;
+	snake->point += 10;
+	UpdatePoint(snake->point);
+	if (gameLVL->isLifeFood) {
+		snake->life++;
+		UpdateUIInfo(&snake->life, 2, UI_LIFE_X, UI_LIFE_Y);
+		gameLVL->isLifeFood = 0;
+	}
 	if (gameLVL->timeLimit) {
 		gameLVL->timer += gameLVL->extraTimePerFood;
 		if (gameLVL->timer > gameLVL->baseTimer) gameLVL->timer = gameLVL->baseTimer;
@@ -113,7 +120,7 @@ void EatFood(GameLVL* gameLVL, Snake* snake) {
 		UpdateUIInfo(&snake->speed, 2, UI_SPEED_X, UI_SPEED_Y);
 	}
 	if (snake->body.size() < gameLVL->maxSizeSnake) GrowUp(snake);
-	if (!gameLVL->gateOpen)	gameLVL->food = SpawnFood(&snake->body, &gameLVL->wall);
+	if (!gameLVL->gateOpen)	gameLVL->food = SpawnFood(&snake->body, &gameLVL->wall, &gameLVL->isLifeFood);
 
 }
 
@@ -174,6 +181,19 @@ bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 	else {
 		DrawTitlePlayArea("YOU LOSE");
 		*curLVL = 1;
+		size_t highestPoint = 0;
+		ifstream fIn;
+		fIn.open("data\\HighestPoint.txt", ios::in);
+		if (fIn.is_open()) {
+			fIn >> highestPoint;
+			fIn.close();
+		}
+		if (snake->point > highestPoint) {
+			ofstream fOut;
+			fOut.open("data\\HighestPoint.txt", ios::out);
+			fOut << snake->point;
+			fOut.close();
+		}
 		snake->point = 0;
 	}
 	GotoXY(0, TEXT_SUB_PA);
@@ -222,7 +242,7 @@ bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 	return 0;
 }
 
-COORD SpawnFood(const vector<COORD>* body, const vector<COORD>* wall) {
+COORD SpawnFood(const vector<COORD>* body, const vector<COORD>* wall, bool* isLifeFood) {
 	srand(time(0));
 	COORD pos;
 	int minX = PA_X;
@@ -239,7 +259,8 @@ COORD SpawnFood(const vector<COORD>* body, const vector<COORD>* wall) {
 		if (FindInCOORD(pos, *wall) != -1) continue;
 		break;
 	} while (true);
-	DrawFood(&pos);
+	*isLifeFood = rand() % 100 < 3 ? 1 : 0;
+	DrawFood(&pos, isLifeFood);
 	return pos;
 }
 
@@ -247,8 +268,9 @@ void Play(GameLVL* gameLVL, Snake* snake, const int* curLVL) {
 	DrawInfoUI(gameLVL, snake, curLVL);
 	DrawWall(*gameLVL);
 	if (gameLVL->gateOpen) DrawGate(gameLVL, snake);
-	else if (gameLVL->food.X == -1) gameLVL->food = SpawnFood(&snake->body, &gameLVL->wall);
-	else DrawFood(&gameLVL->food);
+	else if (gameLVL->food.X == -1) gameLVL->food = SpawnFood(&snake->body, &gameLVL->wall, &gameLVL->isLifeFood);
+	else DrawFood(&gameLVL->food, &gameLVL->isLifeFood);
+	SaveData(curLVL, gameLVL, snake);
 	DrawSnake(snake);
 	WaitForReady(gameLVL);
 	thread thread_1(MoveSnake, gameLVL, snake);
@@ -369,7 +391,7 @@ void PauseGame(HANDLE thrd1, HANDLE thrd2, const int* curLVL, GameLVL* gameLVL, 
 		gameLVL->quit = 1;
 		snake->state = 0;
 	}
-	WaitForReady(gameLVL);
+	else WaitForReady(gameLVL);
 	ResumeThread(thrd1);
 	ResumeThread(thrd2);
 }
@@ -381,6 +403,7 @@ void SaveData(const int* curLVL, const GameLVL* gameLVL, const Snake* snake) {
 	fOut << "CURRENT_LVL " << *curLVL << endl;
 	//Game LVL
 	fOut << "FOOD_COORD " << gameLVL->food.X << ' ' << gameLVL->food.Y << endl;
+	fOut << "IS_LIFE_FOOD " << gameLVL->isLifeFood << endl;
 	fOut << "GATE_OPEN " << gameLVL->gateOpen << endl;
 	fOut << "TIMER " << gameLVL->timer << endl;
 	//Snake
@@ -411,6 +434,7 @@ bool LoadData(int* curLVL, GameLVL* gameLVL, Snake* snake) {
 	
 	//GameLVL
 	fIn >> str >> gameLVL->food.X >> gameLVL->food.Y;
+	fIn >> str >> gameLVL->isLifeFood;
 	fIn >> str >> gameLVL->gateOpen;
 	fIn >> str >> gameLVL->timer;
 	//Snake
@@ -431,4 +455,8 @@ bool LoadData(int* curLVL, GameLVL* gameLVL, Snake* snake) {
 
 	fIn.close();
 	return 1;
+}
+
+void PointRewardByTime(const GameLVL* gameLVL, Snake* snake) {
+	if (gameLVL->timeLimit) snake->point += ((float)gameLVL->timer / gameLVL->baseTimer) * 50;
 }

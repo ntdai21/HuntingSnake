@@ -31,7 +31,7 @@
 SPEED 20
 DIRECTION d
 ---------------------------------------------Level----------------------------------------------
-MAX_FOOD 10
+MAX_FOOD 999
 MAX_SIZE_SNAKE 10
 FOOD_TO_SPEED_UP 1
 EXTRA_TIME_EACH_FOOD 10

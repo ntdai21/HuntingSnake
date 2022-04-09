@@ -22,7 +22,7 @@ void Win(int* curLVL);
 
 bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL);
 
-COORD SpawnFood(const std::vector<COORD>* body, const std::vector<COORD>* wall);
+COORD SpawnFood(const std::vector<COORD>* body, const std::vector<COORD>* wall, bool* isLifeFood);
 
 //Play
 void Play(GameLVL* gameLVL, Snake* snake, const int* curLVL);
@@ -42,3 +42,5 @@ void PauseGame(HANDLE thrd1, HANDLE thrd2, const int* curLVL, GameLVL* gameLVL, 
 void SaveData(const int* curLVL, const GameLVL* gameLVL, const Snake* snake);
 
 bool LoadData(int* curLVL, GameLVL* gameLVL, Snake* snake);
+
+void PointRewardByTime(const GameLVL* gameLVL, Snake* snake);

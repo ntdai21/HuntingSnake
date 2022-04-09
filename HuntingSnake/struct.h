@@ -24,6 +24,7 @@
 #define INFO_TITLE_COLOR 3
 #define BUTTON_TEXT_COLOR 3
 #define FOOD_COLOR 12
+#define LIFE_FOOD_COLOR 13
 
 //Play area
 #define PA_X 1
@@ -64,6 +65,7 @@ struct GameLVL {
 	int maxFood = 6; //Maximum amount of food can be collected in this level.
 	std::vector<COORD> wall; //Wall positions.
 	COORD food = { -1, -1 }; //Food position.
+	bool isLifeFood = 0;
 	int foodToSpeedUp = 5; //Amount of food to increase speed.
 	float extraTimePerFood;
 	size_t timer = 20;
@@ -87,9 +89,9 @@ struct Snake {
 	char curDirection = 'd';
 	bool state; //0 = dead, 1 = alive.
 	unsigned int point = 0;
-	int life = 3;
+	int life = 1;
 	int nextPattern = 0; // 0-31
-	std::string pattern = "21127587";
+	std::string pattern = "21127191211275872112760721127726";
 };
 
 struct Square {
@@ -101,7 +103,5 @@ struct Square {
 
 struct Title {
 	std::string text[5];
-	char pattern = '²';
-	int color = 7;
 };
 

@@ -19,7 +19,7 @@ int main() {
 	FixConsole();
 	ScaleMenu(consoleSizeScale);
 	
-	while (choose != 3) {
+	while (choose != 2) {
 		MainMenu(&choose);
 		if (choose == 0) loadData = 1;
 		else if (choose == 1) {
@@ -45,6 +45,8 @@ int main() {
 				}
 
 				if (gameLVL.isWin) {
+					PointRewardByTime(&gameLVL, &snake);
+					UpdatePoint(snake.point);
 					Win(&curLVL);
 					continue;
 				}
@@ -53,8 +55,6 @@ int main() {
 					if (isLose) break;
 				}
 			}
-			break;
-		case 2:
 			break;
 		default:
 			break;
