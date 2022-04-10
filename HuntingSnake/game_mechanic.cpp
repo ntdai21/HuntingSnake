@@ -86,7 +86,7 @@ void CheckTimer(GameLVL* gameLVL, Snake* snake) {
 }
 
 void EatFood(GameLVL* gameLVL, Snake* snake) {
-	//PlayMP3("eat_food");
+	PlayMP3("eat_food");
 	snake->food++;
 	snake->point += 10;
 	UpdatePoint(snake->point);
