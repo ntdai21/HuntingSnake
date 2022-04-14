@@ -173,28 +173,13 @@ void Win(int* curLVL) {
 	_getch();
 }
 
-bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
+bool Lose(GameLVL* gameLVL, Snake* snake, int* curLVL) {
 	PlayMP3("die");
 	if (snake->life > 0) {
 		DrawTitlePlayArea("YOU DIE");
 	}
 	else {
 		DrawTitlePlayArea("YOU LOSE");
-		*curLVL = 1;
-		size_t highestPoint = 0;
-		ifstream fIn;
-		fIn.open("data\\HighestPoint.txt", ios::in);
-		if (fIn.is_open()) {
-			fIn >> highestPoint;
-			fIn.close();
-		}
-		if (snake->point > highestPoint) {
-			ofstream fOut;
-			fOut.open("data\\HighestPoint.txt", ios::out);
-			fOut << snake->point;
-			fOut.close();
-		}
-		snake->point = 0;
 	}
 	GotoXY(0, TEXT_SUB_PA);
 	srand(time(0));
@@ -235,8 +220,9 @@ bool Lose(const GameLVL* gameLVL, Snake* snake, int* curLVL) {
 	}
 	_getch();
 	if (snake->life == 0) {
-		snake->life = 1;
 		remove("data\\save.txt");
+		UpdateHighestPoint(snake->point);
+		ResetAllData(gameLVL, snake, curLVL);
 		return 1;
 	}
 	return 0;
@@ -289,11 +275,12 @@ bool LoadLVL(int* lvl, GameLVL* gameLVL, Snake* snake, bool* loadData) {
 	fIn.open("data\\levels\\level" + to_string(*lvl) + ".txt", ios::in);
 	if (!fIn) {
 		PlayMP3("max_level");
-		*lvl = 1;
 		remove("data\\save.txt");
 		DrawTitlePlayArea("MAX LEVEL");
 		PrintSubTextPA("Congratulation! You have passed all levels");
 		_getch();
+		UpdateHighestPoint(snake->point);
+		ResetAllData(gameLVL, snake, lvl);
 		return 0;
 	}
 	string str;
@@ -372,6 +359,13 @@ void ResetGameLVLAndSnakeData(GameLVL* gameLVL, Snake* snake) {
 	gameLVL->gate.resize(0);
 	gameLVL->gateOpen = false;
 	gameLVL->isWin = false;
+}
+
+void ResetAllData(GameLVL* gameLVL, Snake* snake, int* curLVL) {
+	ResetGameLVLAndSnakeData(gameLVL, snake);
+	*curLVL = 1;
+	snake->life = 1;
+	snake->point = 0;
 }
 
 void TimeCountDown(size_t* timer, const bool* state) {

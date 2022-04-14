@@ -60,23 +60,20 @@ void DrawTitle1() {
 	cout << "                Û  ²   ²  ²²²²²  ²   ²    ²    ²²²²²  ²   ²  ²²²²²  ²²²²²  ²   ²  ²   ²  ²   ²  ²²²²²  Û                ";
 	cout << "                Û                                                                                      Û                ";
 	cout << "                ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                    ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                ";
-	Title title = CreateTitle("HUNTINGSNAKE");
-	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
-	CenterSquareInSquare({ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - 10 }, &titleSquare);
-	DrawTitle({ titleSquare.x, titleSquare.y }, title);
 	GotoXY(52, 13);
 	cout << "MADE BY GROUP 12";
 	ifstream fIn;
-	size_t highestPoint = 0;
+	string name;
+	int point = 0;
 	fIn.open("data\\HighestPoint.txt", ios::in);
 	if (fIn.is_open()) {
-		fIn >> highestPoint;
+		fIn >> point >> name;
 		fIn.close();
 	}
 	GotoXY(0, 15);
 	SetTextColor(BACKGROUND_COLOR, FOOD_COLOR);
-	string str = "Highest Score: " + to_string(highestPoint);
-	cout << CenterAlign(str, WINDOW_WIDTH);
+	string str1 = "Highest Score: " + to_string(point) + "\t Player: " + name;
+	cout << CenterAlign(str1, WINDOW_WIDTH);
 }
 
 void MainMenu(int* choose) {
@@ -734,7 +731,10 @@ void UpdateLifeTime(const GameLVL* gameLVL) {
 	else if (percent > 0.25) SetTextColor(BACKGROUND_COLOR, 6);
 	else SetTextColor(BACKGROUND_COLOR, 4);
 	if (gameLVL->timeLimit) cout << DrawAdjustBar(LifeTimeBar, percent);
-	else cout << DrawAdjustBar(LifeTimeBar, LifeTimeBar);
+	else {
+		SetTextColor(BACKGROUND_COLOR, 2);
+		cout << DrawAdjustBar(LifeTimeBar, LifeTimeBar);
+	}
 }
 
 int PauseMenu() {
@@ -854,6 +854,7 @@ void WaitForReady(const GameLVL* gameLVL) {
 }
 
 void UpdatePoint(int point) {
+
 	string str = "000.000.000";
 	int digit = 10;
 	while (point) {
@@ -864,4 +865,33 @@ void UpdatePoint(int point) {
 	SetTextColor(BACKGROUND_COLOR, NORMAL_TEXT_COLOR);
 	GotoXY(UI_POINT_X, UI_POINT_Y);
 	cout << str;
+}
+
+string GetName() {
+	ClearSquare({ PA_X, PA_Y, PA_DX, PA_DY });
+	DrawTitlePlayArea("HIGHEST POINT");
+	PrintSubTextPA("You are the best player from now, tell us your name");
+	GotoXY(0, TEXT_SUB_PA + 1);
+	cout << CenterAlign("Name (max 16 character, no space):                 ", PA_DX);
+	GotoXY(56, TEXT_SUB_PA + 1);
+	string str;
+	cin >> str;
+	if (str.size() > 16) str.resize(16);
+	return str;
+}
+
+void UpdateHighestPoint(const int& point) {
+	size_t highestPoint = 0;
+	ifstream fIn;
+	fIn.open("data\\HighestPoint.txt", ios::in);
+	if (fIn.is_open()) {
+		fIn >> highestPoint;
+		fIn.close();
+	}
+	if (point > highestPoint) {
+		ofstream fOut;
+		fOut.open("data\\HighestPoint.txt", ios::out);
+		fOut << point << ' ' << GetName();
+		fOut.close();
+	}
 }

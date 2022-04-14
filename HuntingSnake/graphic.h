@@ -101,3 +101,7 @@ void DrawObjective(const GameLVL* gameLVL);
 void WaitForReady(const GameLVL* gameLVL);
 
 void UpdatePoint(int point);
+
+std::string GetName();
+
+void UpdateHighestPoint(const int& point);
