@@ -60,6 +60,10 @@ void DrawTitle1() {
 	cout << "                Û  ²   ²  ²²²²²  ²   ²    ²    ²²²²²  ²   ²  ²²²²²  ²²²²²  ²   ²  ²   ²  ²   ²  ²²²²²  Û                ";
 	cout << "                Û                                                                                      Û                ";
 	cout << "                ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                    ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß                ";
+	Title title = CreateTitle("HUNTINGSNAKE");
+	Square titleSquare = { 0, 0, title.text[0].size(), 5 };
+	CenterSquareInSquare({ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - 10 }, &titleSquare);
+	DrawTitle({ titleSquare.x, titleSquare.y }, title);
 	GotoXY(52, 13);
 	cout << "MADE BY GROUP 12";
 	ifstream fIn;
@@ -157,8 +161,8 @@ string CenterAlign(const string& str, const int& width) {
 void SetFontScale(const int& scale) {
 	CONSOLE_FONT_INFOEX cf = { 0 };
 	cf.cbSize = sizeof cf;
-	cf.dwFontSize.X = 10 * scale / 100;
-	cf.dwFontSize.Y = 20 * scale / 100;
+	cf.dwFontSize.X = 10 * (float)scale / 100;
+	cf.dwFontSize.Y = 20 * (float)scale / 100;
 	wcscpy_s(cf.FaceName, L"Terminal");
 	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), 0, &cf);
 }

@@ -38,4 +38,4 @@ EXTRA_TIME_EACH_FOOD 8
 TIMER 120
 ---------------------------------------------Modes----------------------------------------------
 TIME_LIMIT 1
-CAN_SELF_TOUCHING 1
+CAN_SELF_TOUCHING 0
